@@ -24,6 +24,35 @@ class Story with _$Story {
   }) = _Story;
 
   factory Story.fromJson(Map<String, dynamic> json) => _$StoryFromJson(json);
+
+  /// Create a placeholder story for a country
+  factory Story.placeholder(String countryName) {
+    final countryCode = countryName.substring(0, 2).toUpperCase();
+    return Story(
+      id: 'placeholder_${countryName.toLowerCase().replaceAll(' ', '_')}',
+      title: 'Conte de $countryName',
+      country: countryName,
+      countryCode: countryCode,
+      content: {
+        'fr': 'Une histoire merveilleuse de $countryName vous attend !',
+        'en': 'A wonderful story from $countryName awaits you!'
+      },
+      imageUrl: 'assets/images/placeholder_story.png',
+      audioUrl: '',
+      estimatedReadingTime: 5,
+      estimatedAudioDuration: 8,
+      values: ['Courage', 'Sagesse'],
+      quizQuestions: [],
+      metadata: StoryMetadata(
+        author: 'Griot traditionnel',
+        origin: countryName,
+        moralLesson: 'Respect et courage',
+        keywords: const ['Tradition', 'Sagesse'],
+        ageGroup: '5-12',
+        difficulty: 'facile',
+      ),
+    );
+  }
 }
 
 @freezed

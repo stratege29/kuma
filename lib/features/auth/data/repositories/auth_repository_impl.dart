@@ -19,7 +19,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, AppUser>> signInAnonymously() async {
     try {
       final firebaseUser = await remoteDataSource.signInAnonymously();
-      
+
       // Créer un AppUser par défaut
       final appUser = AppUser(
         id: firebaseUser.uid,
@@ -32,7 +32,7 @@ class AuthRepositoryImpl implements AuthRepository {
           language: 'fr',
         ),
         childProfiles: [],
-        progress: UserProgress(
+        progress: const UserProgress(
           currentCountry: '',
           completedStories: {},
           quizResults: {},
@@ -45,10 +45,10 @@ class AuthRepositoryImpl implements AuthRepository {
         createdAt: DateTime.now(),
         lastLoginAt: DateTime.now(),
       );
-      
+
       // Sauvegarder dans Firestore
       await remoteDataSource.saveUserData(appUser);
-      
+
       return Right(appUser);
     } on FirebaseAuthException catch (e) {
       return Left(AuthFailure(
@@ -69,12 +69,13 @@ class AuthRepositoryImpl implements AuthRepository {
       if (firebaseUser == null) {
         return const Right(null);
       }
-      
+
       final appUser = await remoteDataSource.getUserData(firebaseUser.uid);
       return Right(appUser);
     } catch (e) {
       return Left(UnknownFailure(
-        message: 'Erreur lors de la récupération de l\'utilisateur: ${e.toString()}',
+        message:
+            'Erreur lors de la récupération de l\'utilisateur: ${e.toString()}',
       ));
     }
   }

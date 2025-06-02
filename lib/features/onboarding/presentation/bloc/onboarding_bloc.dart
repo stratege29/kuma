@@ -26,7 +26,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     _NextPage event,
     Emitter<OnboardingState> emit,
   ) {
-    if (state.currentPage < 6) {
+    if (state.currentPage < 7) {
       emit(state.copyWith(currentPage: state.currentPage + 1));
     }
   }
@@ -44,7 +44,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     _GoToPage event,
     Emitter<OnboardingState> emit,
   ) {
-    if (event.page >= 0 && event.page <= 6) {
+    if (event.page >= 0 && event.page <= 7) {
       emit(state.copyWith(currentPage: event.page));
     }
   }

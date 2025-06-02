@@ -6,11 +6,11 @@ class AppTheme {
   static const Color primaryOrange = Color(0xFFFF6B35);
   static const Color primaryGreen = Color(0xFF2ECC71);
   static const Color primaryBrown = Color(0xFF8B4513);
-  
+
   static const Color backgroundLight = Color(0xFFFFFBF3);
   static const Color surfaceLight = Color(0xFFFFFFFF);
   static const Color onSurfaceLight = Color(0xFF1C1B1F);
-  
+
   static const Color backgroundDark = Color(0xFF1C1B1F);
   static const Color surfaceDark = Color(0xFF2D2C30);
   static const Color onSurfaceDark = Color(0xFFE6E1E5);
@@ -164,9 +164,9 @@ class AppTheme {
   }
 
   static BottomSheetThemeData get _bottomSheetTheme {
-    return BottomSheetThemeData(
+    return const BottomSheetThemeData(
       backgroundColor: surfaceLight,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       elevation: 8,
@@ -174,9 +174,9 @@ class AppTheme {
   }
 
   static BottomSheetThemeData get _bottomSheetThemeDark {
-    return BottomSheetThemeData(
+    return const BottomSheetThemeData(
       backgroundColor: surfaceDark,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       elevation: 8,

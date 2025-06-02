@@ -55,7 +55,7 @@ class _CompletionPageState extends State<CompletionPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -101,9 +101,9 @@ class _CompletionPageState extends State<CompletionPage>
                 );
               },
             ),
-            
+
             const SizedBox(height: 40),
-            
+
             // Texte de félicitations
             AnimatedBuilder(
               animation: _animationController,
@@ -120,28 +120,26 @@ class _CompletionPageState extends State<CompletionPage>
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      
                       const SizedBox(height: 16),
-                      
                       BlocBuilder<OnboardingBloc, OnboardingState>(
                         builder: (context, state) {
                           return Text(
                             'Votre profil est configuré !\nVotre aventure commence par ${state.startingCountry}.',
                             style: theme.textTheme.bodyLarge?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(0.8),
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.8),
                               height: 1.6,
                             ),
                             textAlign: TextAlign.center,
                           );
                         },
                       ),
-                      
                       const SizedBox(height: 32),
-                      
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                          color: theme.colorScheme.surfaceContainerHighest
+                              .withOpacity(0.5),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Column(
@@ -164,7 +162,8 @@ class _CompletionPageState extends State<CompletionPage>
                             Text(
                               'Explorez la sagesse et la richesse culturelle de l\'Afrique à travers des histoires captivantes.',
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.7),
                               ),
                               textAlign: TextAlign.center,
                             ),

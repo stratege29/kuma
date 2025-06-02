@@ -1,5 +1,16 @@
 /// Ordre des pays pour le parcours circulaire de Kuma
 class Countries {
+  // Story states
+  static const String STORY_STATE_INVISIBLE = 'invisible';
+  static const String STORY_STATE_VISIBLE_LOCKED = 'visible_locked';
+  static const String STORY_STATE_UNLOCKED = 'unlocked';
+  static const String STORY_STATE_COMPLETED = 'completed';
+
+  // Progression rules
+  static const int FREE_STORIES_PER_WEEK = 1;
+  static const int PREMIUM_STORIES_PER_DAY = 1;
+  static const Duration FREE_UNLOCK_INTERVAL = Duration(days: 7);
+  static const Duration PREMIUM_UNLOCK_INTERVAL = Duration(days: 1);
   static const Map<String, String> COUNTRY_ORDER = {
     "South Africa": "ZAF",
     "Lesotho": "LSO",

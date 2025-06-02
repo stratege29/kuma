@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:kuma/core/constants/countries.dart';
 import 'package:kuma/shared/domain/entities/story.dart';
-
-enum StoryCardState {
-  invisible,
-  locked,
-  unlocked,
-  completed,
-}
 
 class StoryCardWidget extends StatefulWidget {
   final Story story;
-  final bool isUnlocked;
+  final String state; // invisible, visible_locked, unlocked, completed
   final VoidCallback onTap;
 
   const StoryCardWidget({
     super.key,
     required this.story,
-    required this.isUnlocked,
+    required this.state,
     required this.onTap,
   });
 
@@ -34,8 +28,8 @@ class _StoryCardWidgetState extends State<StoryCardWidget>
     super.initState();
     _initAnimations();
     
-    // Démarrer l'animation de pulsation si c'est la carte active
-    if (widget.isUnlocked && !widget.story.isCompleted) {
+    // Start pulse animation for unlocked stories
+    if (widget.state == Countries.STORY_STATE_UNLOCKED) {
       _animationController.repeat(reverse: true);
     }
   }
@@ -48,7 +42,7 @@ class _StoryCardWidgetState extends State<StoryCardWidget>
 
     _pulseAnimation = Tween<double>(
       begin: 1.0,
-      end: 1.2,
+      end: 1.15,
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
@@ -59,8 +53,8 @@ class _StoryCardWidgetState extends State<StoryCardWidget>
   void didUpdateWidget(StoryCardWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     
-    // Mettre à jour l'animation selon l'état
-    if (widget.isUnlocked && !widget.story.isCompleted) {
+    // Update animation based on state
+    if (widget.state == Countries.STORY_STATE_UNLOCKED) {
       _animationController.repeat(reverse: true);
     } else {
       _animationController.stop();
@@ -74,65 +68,59 @@ class _StoryCardWidgetState extends State<StoryCardWidget>
     super.dispose();
   }
 
-  StoryCardState get _cardState {
-    if (!widget.isUnlocked) {
-      return StoryCardState.locked;
-    } else if (widget.story.isCompleted) {
-      return StoryCardState.completed;
-    } else {
-      return StoryCardState.unlocked;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final state = _cardState;
+    
+    // Don't render invisible stories
+    if (widget.state == Countries.STORY_STATE_INVISIBLE) {
+      return const SizedBox.shrink();
+    }
     
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
         return Transform.scale(
-          scale: state == StoryCardState.unlocked ? _pulseAnimation.value : 1.0,
+          scale: widget.state == Countries.STORY_STATE_UNLOCKED ? _pulseAnimation.value : 1.0,
           child: GestureDetector(
             onTap: widget.onTap,
             child: Container(
-              width: 60,
-              height: 60,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _getCardColor(state, theme),
+                color: _getCardColor(theme),
                 border: Border.all(
-                  color: _getBorderColor(state, theme),
+                  color: _getBorderColor(theme),
                   width: 3,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: _getCardColor(state, theme).withOpacity(0.3),
-                    blurRadius: state == StoryCardState.unlocked ? 15 : 8,
-                    spreadRadius: state == StoryCardState.unlocked ? 3 : 1,
+                    color: _getCardColor(theme).withOpacity(0.3),
+                    blurRadius: widget.state == Countries.STORY_STATE_UNLOCKED ? 15 : 8,
+                    spreadRadius: widget.state == Countries.STORY_STATE_UNLOCKED ? 3 : 1,
                   ),
                 ],
               ),
               child: Stack(
                 children: [
-                  // Icône principale
+                  // Main icon
                   Center(
                     child: Icon(
-                      _getCardIcon(state),
-                      color: _getIconColor(state, theme),
-                      size: 24,
+                      _getCardIcon(),
+                      color: _getIconColor(theme),
+                      size: 32,
                     ),
                   ),
                   
-                  // Badge de completion
-                  if (state == StoryCardState.completed)
+                  // Completion badge
+                  if (widget.state == Countries.STORY_STATE_COMPLETED)
                     Positioned(
-                      top: -2,
-                      right: -2,
+                      top: 0,
+                      right: 0,
                       child: Container(
-                        width: 20,
-                        height: 20,
+                        width: 24,
+                        height: 24,
                         decoration: BoxDecoration(
                           color: Colors.green,
                           shape: BoxShape.circle,
@@ -141,19 +129,19 @@ class _StoryCardWidgetState extends State<StoryCardWidget>
                         child: const Icon(
                           Icons.check,
                           color: Colors.white,
-                          size: 12,
+                          size: 14,
                         ),
                       ),
                     ),
                   
-                  // Icône de verrouillage
-                  if (state == StoryCardState.locked)
+                  // Lock overlay for locked stories
+                  if (widget.state == Countries.STORY_STATE_VISIBLE_LOCKED)
                     Positioned(
-                      bottom: -2,
-                      right: -2,
+                      bottom: 0,
+                      right: 0,
                       child: Container(
-                        width: 20,
-                        height: 20,
+                        width: 24,
+                        height: 24,
                         decoration: BoxDecoration(
                           color: theme.colorScheme.error,
                           shape: BoxShape.circle,
@@ -162,10 +150,20 @@ class _StoryCardWidgetState extends State<StoryCardWidget>
                         child: const Icon(
                           Icons.lock,
                           color: Colors.white,
-                          size: 12,
+                          size: 14,
                         ),
                       ),
                     ),
+
+                  // Country flag emoji (if available)
+                  Positioned(
+                    top: 4,
+                    left: 4,
+                    child: Text(
+                      _getCountryEmoji(),
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -175,55 +173,123 @@ class _StoryCardWidgetState extends State<StoryCardWidget>
     );
   }
 
-  Color _getCardColor(StoryCardState state, ThemeData theme) {
-    switch (state) {
-      case StoryCardState.invisible:
-        return Colors.transparent;
-      case StoryCardState.locked:
+  Color _getCardColor(ThemeData theme) {
+    switch (widget.state) {
+      case Countries.STORY_STATE_VISIBLE_LOCKED:
         return theme.colorScheme.surface;
-      case StoryCardState.unlocked:
+      case Countries.STORY_STATE_UNLOCKED:
         return theme.colorScheme.primary;
-      case StoryCardState.completed:
+      case Countries.STORY_STATE_COMPLETED:
         return theme.colorScheme.secondary;
+      default:
+        return Colors.transparent;
     }
   }
 
-  Color _getBorderColor(StoryCardState state, ThemeData theme) {
-    switch (state) {
-      case StoryCardState.invisible:
-        return Colors.transparent;
-      case StoryCardState.locked:
+  Color _getBorderColor(ThemeData theme) {
+    switch (widget.state) {
+      case Countries.STORY_STATE_VISIBLE_LOCKED:
         return theme.colorScheme.outline;
-      case StoryCardState.unlocked:
+      case Countries.STORY_STATE_UNLOCKED:
         return theme.colorScheme.primary;
-      case StoryCardState.completed:
+      case Countries.STORY_STATE_COMPLETED:
         return theme.colorScheme.secondary;
-    }
-  }
-
-  Color _getIconColor(StoryCardState state, ThemeData theme) {
-    switch (state) {
-      case StoryCardState.invisible:
+      default:
         return Colors.transparent;
-      case StoryCardState.locked:
-        return theme.colorScheme.onSurface.withOpacity(0.5);
-      case StoryCardState.unlocked:
-        return Colors.white;
-      case StoryCardState.completed:
-        return Colors.white;
     }
   }
 
-  IconData _getCardIcon(StoryCardState state) {
-    switch (state) {
-      case StoryCardState.invisible:
-        return Icons.circle;
-      case StoryCardState.locked:
-        return Icons.auto_stories_outlined;
-      case StoryCardState.unlocked:
-        return Icons.auto_stories;
-      case StoryCardState.completed:
-        return Icons.auto_stories;
+  Color _getIconColor(ThemeData theme) {
+    switch (widget.state) {
+      case Countries.STORY_STATE_VISIBLE_LOCKED:
+        return theme.colorScheme.onSurface.withOpacity(0.5);
+      case Countries.STORY_STATE_UNLOCKED:
+        return Colors.white;
+      case Countries.STORY_STATE_COMPLETED:
+        return Colors.white;
+      default:
+        return Colors.transparent;
     }
+  }
+
+  IconData _getCardIcon() {
+    switch (widget.state) {
+      case Countries.STORY_STATE_VISIBLE_LOCKED:
+        return Icons.auto_stories_outlined;
+      case Countries.STORY_STATE_UNLOCKED:
+        return Icons.auto_stories;
+      case Countries.STORY_STATE_COMPLETED:
+        return Icons.auto_stories;
+      default:
+        return Icons.circle;
+    }
+  }
+
+  String _getCountryEmoji() {
+    // Simple mapping of some countries to their flag emojis
+    const countryFlags = {
+      'Cote d\'Ivoire': '🇨🇮',
+      'Ghana': '🇬🇭',
+      'Nigeria': '🇳🇬',
+      'Cameroon': '🇨🇲',
+      'Kenya': '🇰🇪',
+      'Ethiopia': '🇪🇹',
+      'Egypt': '🇪🇬',
+      'Morocco': '🇲🇦',
+      'Senegal': '🇸🇳',
+      'South Africa': '🇿🇦',
+    };
+    
+    return countryFlags[widget.story.country] ?? '🌍';
+  }
+}
+
+/// Placeholder widget for "coming soon" stories
+class ComingSoonStoryCard extends StatelessWidget {
+  final VoidCallback? onTap;
+
+  const ComingSoonStoryCard({
+    super.key,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 80,
+        height: 80,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: theme.colorScheme.surface.withOpacity(0.3),
+          border: Border.all(
+            color: theme.colorScheme.outline.withOpacity(0.3),
+            width: 2,
+            style: BorderStyle.solid,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.schedule,
+              color: theme.colorScheme.onSurface.withOpacity(0.4),
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Bientôt',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.4),
+                fontSize: 10,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

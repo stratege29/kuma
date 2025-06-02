@@ -15,18 +15,17 @@ class QuizPage extends StatefulWidget {
   State<QuizPage> createState() => _QuizPageState();
 }
 
-class _QuizPageState extends State<QuizPage>
-    with TickerProviderStateMixin {
+class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
   late AnimationController _questionAnimationController;
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
-  
+
   bool _isLoading = true;
   Story? _story;
   int _currentQuestionIndex = 0;
   List<int> _selectedAnswers = [];
   List<bool> _questionResults = [];
-  bool _showResult = false;
+  final bool _showResult = false;
   bool _isAnswerSelected = false;
 
   @override
@@ -84,7 +83,7 @@ class _QuizPageState extends State<QuizPage>
       estimatedAudioDuration: 5,
       values: ['Sagesse', 'Prudence', 'Amitié'],
       quizQuestions: [
-        QuizQuestion(
+        const QuizQuestion(
           id: 'q1',
           question: 'Qui sont les deux personnages principaux de l\'histoire ?',
           options: [
@@ -94,9 +93,10 @@ class _QuizPageState extends State<QuizPage>
             'Un chien et un chat'
           ],
           correctAnswer: 1,
-          explanation: 'Les héros de cette histoire sont bien Leuk le lièvre, malin et astucieux, et Bouki l\'hyène, forte mais naïve.',
+          explanation:
+              'Les héros de cette histoire sont bien Leuk le lièvre, malin et astucieux, et Bouki l\'hyène, forte mais naïve.',
         ),
-        QuizQuestion(
+        const QuizQuestion(
           id: 'q2',
           question: 'Que décident de faire ensemble Leuk et Bouki ?',
           options: [
@@ -106,9 +106,10 @@ class _QuizPageState extends State<QuizPage>
             'Chasser dans la forêt'
           ],
           correctAnswer: 1,
-          explanation: 'Ils décident de creuser un puits ensemble car la saison sèche approche et l\'eau se fait rare.',
+          explanation:
+              'Ils décident de creuser un puits ensemble car la saison sèche approche et l\'eau se fait rare.',
         ),
-        QuizQuestion(
+        const QuizQuestion(
           id: 'q3',
           question: 'Quelle est la principale leçon de cette histoire ?',
           options: [
@@ -118,10 +119,11 @@ class _QuizPageState extends State<QuizPage>
             'Les animaux ne peuvent pas être amis'
           ],
           correctAnswer: 1,
-          explanation: 'Cette histoire nous enseigne que même si l\'intelligence peut l\'emporter, il ne faut pas abuser de la confiance de ses amis.',
+          explanation:
+              'Cette histoire nous enseigne que même si l\'intelligence peut l\'emporter, il ne faut pas abuser de la confiance de ses amis.',
         ),
       ],
-      metadata: StoryMetadata(
+      metadata: const StoryMetadata(
         author: 'Conte traditionnel sénégalais',
         origin: 'Senegal',
         moralLesson: 'La ruse ne doit pas nuire à l\'amitié',
@@ -142,7 +144,8 @@ class _QuizPageState extends State<QuizPage>
     });
 
     // Vérifier la réponse
-    final isCorrect = answerIndex == _story!.quizQuestions[_currentQuestionIndex].correctAnswer;
+    final isCorrect = answerIndex ==
+        _story!.quizQuestions[_currentQuestionIndex].correctAnswer;
     _questionResults[_currentQuestionIndex] = isCorrect;
 
     // Attendre un peu avant de passer à la question suivante
@@ -168,10 +171,9 @@ class _QuizPageState extends State<QuizPage>
   void _finishQuiz() {
     final score = _questionResults.where((result) => result).length;
     final passed = score >= AppConstants.QUIZ_PASSING_SCORE;
-    
+
     context.go(
-      '${AppConstants.ROUTE_QUIZ_RESULT}/${widget.storyId}?score=$score&total=${_story!.quizQuestions.length}&passed=$passed'
-    );
+        '${AppConstants.ROUTE_QUIZ_RESULT}/${widget.storyId}?score=$score&total=${_story!.quizQuestions.length}&passed=$passed');
   }
 
   @override
@@ -183,7 +185,7 @@ class _QuizPageState extends State<QuizPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quiz'),
@@ -202,7 +204,7 @@ class _QuizPageState extends State<QuizPage>
                       end: Alignment.bottomCenter,
                       colors: [
                         theme.colorScheme.primary.withOpacity(0.1),
-                        theme.colorScheme.background,
+                        theme.colorScheme.surface,
                       ],
                     ),
                   ),
@@ -217,9 +219,9 @@ class _QuizPageState extends State<QuizPage>
                             totalQuestions: _story!.quizQuestions.length,
                             theme: theme,
                           ),
-                          
+
                           const SizedBox(height: 32),
-                          
+
                           // Question
                           Expanded(
                             child: AnimatedBuilder(
@@ -227,14 +229,17 @@ class _QuizPageState extends State<QuizPage>
                               builder: (context, child) {
                                 return Transform.translate(
                                   offset: Offset(
-                                    _slideAnimation.value * MediaQuery.of(context).size.width,
+                                    _slideAnimation.value *
+                                        MediaQuery.of(context).size.width,
                                     0,
                                   ),
                                   child: Opacity(
                                     opacity: _fadeAnimation.value,
                                     child: _QuestionCard(
-                                      question: _story!.quizQuestions[_currentQuestionIndex],
-                                      selectedAnswer: _selectedAnswers[_currentQuestionIndex],
+                                      question: _story!
+                                          .quizQuestions[_currentQuestionIndex],
+                                      selectedAnswer: _selectedAnswers[
+                                          _currentQuestionIndex],
                                       onAnswerSelected: _selectAnswer,
                                       showResult: _isAnswerSelected,
                                       theme: theme,
@@ -283,9 +288,7 @@ class _ProgressIndicator extends StatelessWidget {
             ),
           ],
         ),
-        
         const SizedBox(height: 16),
-        
         LinearProgressIndicator(
           value: currentQuestion / totalQuestions,
           backgroundColor: theme.colorScheme.outline.withOpacity(0.2),
@@ -327,23 +330,25 @@ class _QuestionCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Options de réponse
             Expanded(
               child: ListView.separated(
                 itemCount: question.options.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final isSelected = selectedAnswer == index;
                   final isCorrect = index == question.correctAnswer;
                   final showCorrectAnswer = showResult && isCorrect;
-                  final showWrongAnswer = showResult && isSelected && !isCorrect;
-                  
+                  final showWrongAnswer =
+                      showResult && isSelected && !isCorrect;
+
                   Color? backgroundColor;
                   Color? borderColor;
-                  
+
                   if (showResult) {
                     if (showCorrectAnswer) {
                       backgroundColor = Colors.green.withOpacity(0.1);
@@ -356,7 +361,7 @@ class _QuestionCard extends StatelessWidget {
                     backgroundColor = theme.colorScheme.primaryContainer;
                     borderColor = theme.colorScheme.primary;
                   }
-                  
+
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     child: Card(
@@ -364,7 +369,8 @@ class _QuestionCard extends StatelessWidget {
                       color: backgroundColor,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(16),
-                        onTap: showResult ? null : () => onAnswerSelected(index),
+                        onTap:
+                            showResult ? null : () => onAnswerSelected(index),
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
@@ -380,38 +386,50 @@ class _QuestionCard extends StatelessWidget {
                                 width: 32,
                                 height: 32,
                                 decoration: BoxDecoration(
-                                  color: borderColor ?? theme.colorScheme.outline.withOpacity(0.2),
+                                  color: borderColor ??
+                                      theme.colorScheme.outline
+                                          .withOpacity(0.2),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Center(
                                   child: Text(
-                                    String.fromCharCode(65 + index), // A, B, C, D
+                                    String.fromCharCode(
+                                        65 + index), // A, B, C, D
                                     style: TextStyle(
-                                      color: borderColor != null ? Colors.white : theme.colorScheme.onSurface,
+                                      color: borderColor != null
+                                          ? Colors.white
+                                          : theme.colorScheme.onSurface,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
                               ),
-                              
+
                               const SizedBox(width: 16),
-                              
+
                               // Texte de l'option
                               Expanded(
                                 child: Text(
                                   question.options[index],
                                   style: theme.textTheme.bodyLarge?.copyWith(
-                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
                                   ),
                                 ),
                               ),
-                              
+
                               // Icône de résultat
                               if (showResult)
                                 Icon(
-                                  showCorrectAnswer ? Icons.check_circle : 
-                                  showWrongAnswer ? Icons.cancel : null,
-                                  color: showCorrectAnswer ? Colors.green : Colors.red,
+                                  showCorrectAnswer
+                                      ? Icons.check_circle
+                                      : showWrongAnswer
+                                          ? Icons.cancel
+                                          : null,
+                                  color: showCorrectAnswer
+                                      ? Colors.green
+                                      : Colors.red,
                                 ),
                             ],
                           ),
@@ -422,14 +440,14 @@ class _QuestionCard extends StatelessWidget {
                 },
               ),
             ),
-            
+
             // Explication après sélection
             if (showResult && question.explanation != null) ...[
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceVariant,
+                  color: theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(

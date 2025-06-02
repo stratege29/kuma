@@ -13,8 +13,10 @@ class AppUser with _$AppUser {
     required List<ChildProfile> childProfiles,
     required UserProgress progress,
     required UserPreferences preferences,
+    @Default(false) bool isPremium,
     DateTime? createdAt,
     DateTime? lastLoginAt,
+    DateTime? premiumExpiresAt,
   }) = _AppUser;
 
   factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);

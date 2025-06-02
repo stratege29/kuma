@@ -19,11 +19,11 @@ class _ListeningPageState extends State<ListeningPage>
     with TickerProviderStateMixin {
   late AnimationController _waveAnimationController;
   late AnimationController _progressAnimationController;
-  
+
   bool _isPlaying = false;
   bool _isLoading = true;
   Duration _currentPosition = Duration.zero;
-  Duration _totalDuration = const Duration(minutes: 5); // Mock duration
+  final Duration _totalDuration = const Duration(minutes: 5); // Mock duration
   Story? _story;
 
   @override
@@ -38,7 +38,7 @@ class _ListeningPageState extends State<ListeningPage>
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    
+
     _progressAnimationController = AnimationController(
       duration: _totalDuration,
       vsync: this,
@@ -68,7 +68,7 @@ class _ListeningPageState extends State<ListeningPage>
       estimatedAudioDuration: 5,
       values: ['Sagesse', 'Prudence', 'Amitié'],
       quizQuestions: [],
-      metadata: StoryMetadata(
+      metadata: const StoryMetadata(
         author: 'Conte traditionnel sénégalais',
         origin: 'Senegal',
         moralLesson: 'La ruse ne doit pas nuire à l\'amitié',
@@ -101,8 +101,9 @@ class _ListeningPageState extends State<ListeningPage>
       Future.delayed(const Duration(milliseconds: 100), () {
         if (_isPlaying && mounted) {
           setState(() {
-            _currentPosition = _currentPosition + const Duration(milliseconds: 100);
-            
+            _currentPosition =
+                _currentPosition + const Duration(milliseconds: 100);
+
             // Auto-finish when audio ends
             if (_currentPosition >= _totalDuration) {
               _onAudioComplete();
@@ -120,10 +121,10 @@ class _ListeningPageState extends State<ListeningPage>
       _isPlaying = false;
       _currentPosition = _totalDuration;
     });
-    
+
     _waveAnimationController.stop();
     _progressAnimationController.stop();
-    
+
     // Navigation automatique vers le quiz
     _showCompletionDialog();
   }
@@ -134,7 +135,8 @@ class _ListeningPageState extends State<ListeningPage>
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Écoute terminée !'),
-        content: const Text('Félicitations ! Vous avez écouté toute l\'histoire. Êtes-vous prêt pour le quiz ?'),
+        content: const Text(
+            'Félicitations ! Vous avez écouté toute l\'histoire. Êtes-vous prêt pour le quiz ?'),
         actions: [
           TextButton(
             onPressed: () {
@@ -162,7 +164,7 @@ class _ListeningPageState extends State<ListeningPage>
     setState(() {
       _currentPosition = newPosition;
     });
-    
+
     _progressAnimationController.value = value;
   }
 
@@ -176,7 +178,7 @@ class _ListeningPageState extends State<ListeningPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Écoute'),
@@ -216,7 +218,7 @@ class _ListeningPageState extends State<ListeningPage>
                       child: Column(
                         children: [
                           const Spacer(),
-                          
+
                           // Image d'illustration
                           Container(
                             width: 250,
@@ -246,7 +248,7 @@ class _ListeningPageState extends State<ListeningPage>
                                     color: Colors.white,
                                   ),
                                 ),
-                                
+
                                 // Animation des ondes sonores
                                 if (_isPlaying)
                                   Positioned.fill(
@@ -265,9 +267,9 @@ class _ListeningPageState extends State<ListeningPage>
                               ],
                             ),
                           ),
-                          
+
                           const SizedBox(height: 40),
-                          
+
                           // Titre de l'histoire
                           Text(
                             _story!.title,
@@ -276,9 +278,9 @@ class _ListeningPageState extends State<ListeningPage>
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          
+
                           const SizedBox(height: 8),
-                          
+
                           // Pays d'origine
                           Text(
                             _story!.country,
@@ -287,23 +289,26 @@ class _ListeningPageState extends State<ListeningPage>
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          
+
                           const Spacer(),
-                          
+
                           // Barre de progression
                           Column(
                             children: [
                               Slider(
-                                value: _currentPosition.inMilliseconds / _totalDuration.inMilliseconds,
+                                value: _currentPosition.inMilliseconds /
+                                    _totalDuration.inMilliseconds,
                                 onChanged: _seekTo,
                                 activeColor: theme.colorScheme.primary,
                               ),
-                              
+
                               // Temps actuel / temps total
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       _formatDuration(_currentPosition),
@@ -318,9 +323,9 @@ class _ListeningPageState extends State<ListeningPage>
                               ),
                             ],
                           ),
-                          
+
                           const SizedBox(height: 24),
-                          
+
                           // Contrôles audio
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -329,16 +334,21 @@ class _ListeningPageState extends State<ListeningPage>
                               IconButton(
                                 onPressed: () {
                                   final newPosition = Duration(
-                                    milliseconds: (_currentPosition.inMilliseconds - 15000).clamp(0, _totalDuration.inMilliseconds),
+                                    milliseconds: (_currentPosition
+                                                .inMilliseconds -
+                                            15000)
+                                        .clamp(
+                                            0, _totalDuration.inMilliseconds),
                                   );
-                                  _seekTo(newPosition.inMilliseconds / _totalDuration.inMilliseconds);
+                                  _seekTo(newPosition.inMilliseconds /
+                                      _totalDuration.inMilliseconds);
                                 },
                                 icon: const Icon(Icons.replay_10),
                                 iconSize: 32,
                               ),
-                              
+
                               const SizedBox(width: 20),
-                              
+
                               // Bouton Play/Pause principal
                               Container(
                                 width: 80,
@@ -348,7 +358,8 @@ class _ListeningPageState extends State<ListeningPage>
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: theme.colorScheme.primary.withOpacity(0.3),
+                                      color: theme.colorScheme.primary
+                                          .withOpacity(0.3),
                                       blurRadius: 15,
                                       spreadRadius: 5,
                                     ),
@@ -363,33 +374,39 @@ class _ListeningPageState extends State<ListeningPage>
                                   ),
                                 ),
                               ),
-                              
+
                               const SizedBox(width: 20),
-                              
+
                               // Bouton avancer 15s
                               IconButton(
                                 onPressed: () {
                                   final newPosition = Duration(
-                                    milliseconds: (_currentPosition.inMilliseconds + 15000).clamp(0, _totalDuration.inMilliseconds),
+                                    milliseconds: (_currentPosition
+                                                .inMilliseconds +
+                                            15000)
+                                        .clamp(
+                                            0, _totalDuration.inMilliseconds),
                                   );
-                                  _seekTo(newPosition.inMilliseconds / _totalDuration.inMilliseconds);
+                                  _seekTo(newPosition.inMilliseconds /
+                                      _totalDuration.inMilliseconds);
                                 },
                                 icon: const Icon(Icons.forward_10),
                                 iconSize: 32,
                               ),
                             ],
                           ),
-                          
+
                           const SizedBox(height: 32),
-                          
+
                           // Bouton pour passer directement au quiz
                           TextButton(
                             onPressed: () {
-                              context.go('${AppConstants.ROUTE_QUIZ}/${widget.storyId}');
+                              context.go(
+                                  '${AppConstants.ROUTE_QUIZ}/${widget.storyId}');
                             },
                             child: const Text('Passer au quiz'),
                           ),
-                          
+
                           const SizedBox(height: 16),
                         ],
                       ),
@@ -420,7 +437,7 @@ class SoundWavePainter extends CustomPainter {
       ..strokeWidth = 2;
 
     final center = Offset(size.width / 2, size.height / 2);
-    
+
     // Dessiner des cercles concentriques animés
     for (int i = 1; i <= 3; i++) {
       final radius = (size.width / 6) * i * (1 + animationValue * 0.5);

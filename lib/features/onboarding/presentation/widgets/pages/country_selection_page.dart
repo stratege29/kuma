@@ -9,32 +9,27 @@ class CountrySelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 40),
-          
           Text(
             'Choisissez votre pays de départ',
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
-          
           const SizedBox(height: 12),
-          
           Text(
             'Votre voyage à travers l\'Afrique commencera par ce pays. Vous pourrez ensuite découvrir tous les autres !',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurface.withOpacity(0.7),
             ),
           ),
-          
           const SizedBox(height: 32),
-          
           Expanded(
             child: BlocBuilder<OnboardingBloc, OnboardingState>(
               builder: (context, state) {
@@ -49,7 +44,7 @@ class CountrySelectionPage extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final country = Countries.TEST_COUNTRIES[index];
                     final isSelected = state.startingCountry == country;
-                    
+
                     return Card(
                       elevation: isSelected ? 8 : 2,
                       color: isSelected
@@ -59,8 +54,8 @@ class CountrySelectionPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                         onTap: () {
                           context.read<OnboardingBloc>().add(
-                            OnboardingEvent.selectStartingCountry(country),
-                          );
+                                OnboardingEvent.selectStartingCountry(country),
+                              );
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(12),
@@ -80,19 +75,21 @@ class CountrySelectionPage extends StatelessWidget {
                                   ),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.flag,
                                   color: Colors.white,
                                   size: 20,
                                 ),
                               ),
-                              
+
                               const SizedBox(height: 8),
-                              
+
                               Text(
                                 country,
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.normal,
                                   color: isSelected
                                       ? theme.colorScheme.onPrimaryContainer
                                       : theme.colorScheme.onSurface,
@@ -101,7 +98,7 @@ class CountrySelectionPage extends StatelessWidget {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              
+
                               if (isSelected) ...[
                                 const SizedBox(height: 4),
                                 Icon(

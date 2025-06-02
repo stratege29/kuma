@@ -17,6 +17,8 @@ class AppConstants {
   
   // Progression
   static const int MAX_CHILDREN = 5;
+  static const int MAX_FREE_CHILDREN = 1;
+  static const int MAX_PREMIUM_CHILDREN = 5;
   
   // Cache Keys
   static const String CACHE_USER_SETTINGS = "user_settings";
@@ -58,12 +60,19 @@ class AppConstants {
     "Avant le coucher (21h-23h)"
   ];
   
-  // Avatar Options
-  static const List<String> AVATAR_OPTIONS = [
-    "avatar_boy_1",
-    "avatar_boy_2", 
-    "avatar_girl_1",
-    "avatar_girl_2",
-    "avatar_neutral_1"
+  // Animal Avatar Options
+  static const List<Map<String, dynamic>> ANIMAL_AVATARS = [
+    {"name": "Lion", "emoji": "🦁", "id": "lion"},
+    {"name": "Éléphant", "emoji": "🐘", "id": "elephant"},
+    {"name": "Girafe", "emoji": "🦒", "id": "giraffe"},
+    {"name": "Zèbre", "emoji": "🦓", "id": "zebra"},
+    {"name": "Rhinocéros", "emoji": "🦏", "id": "rhino"},
+    {"name": "Hippopotame", "emoji": "🦛", "id": "hippo"},
+    {"name": "Guépard", "emoji": "🐆", "id": "cheetah"},
+    {"name": "Gorille", "emoji": "🦍", "id": "gorilla"},
+    {"name": "Flamant", "emoji": "🦩", "id": "flamingo"},
+    {"name": "Perroquet", "emoji": "🦜", "id": "parrot"},
+    {"name": "Singe", "emoji": "🐒", "id": "monkey"},
+    {"name": "Crocodile", "emoji": "🐊", "id": "crocodile"},
   ];
 }

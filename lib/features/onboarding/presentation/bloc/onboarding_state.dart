@@ -10,6 +10,7 @@ class OnboardingState with _$OnboardingState {
     @Default('') String preferredTime,
     @Default('') String startingCountry,
     @Default(false) bool isLoading,
+    @Default(false) bool isPremium,
     String? error,
   }) = _OnboardingState;
 }

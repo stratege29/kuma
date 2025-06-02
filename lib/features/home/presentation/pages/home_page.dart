@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kuma/features/home/presentation/bloc/home_bloc.dart';
-import 'package:kuma/features/home/presentation/widgets/africa_map_widget.dart';
+import 'package:kuma/features/home/presentation/widgets/enhanced_africa_map_widget.dart';
 import 'package:kuma/features/home/presentation/widgets/story_bottom_sheet.dart';
 import 'package:kuma/shared/domain/entities/story.dart';
 
@@ -64,7 +64,7 @@ class _HomeViewState extends State<HomeView> {
               }
             },
             builder: (context, state) {
-              return const AfricaMapWidget();
+              return const EnhancedAfricaMapWidget();
             },
           ),
           const Center(child: Text('Catalogue - À implémenter')),

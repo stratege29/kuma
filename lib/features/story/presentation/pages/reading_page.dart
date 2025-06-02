@@ -46,7 +46,8 @@ class _ReadingPageState extends State<ReadingPage> {
       country: 'Senegal',
       countryCode: 'SEN',
       content: {
-        'fr': '''Il était une fois, dans la savane sénégalaise, deux amis très différents : Leuk le lièvre, petit mais très malin, et Bouki l'hyène, grosse et forte mais pas très intelligente.
+        'fr':
+            '''Il était une fois, dans la savane sénégalaise, deux amis très différents : Leuk le lièvre, petit mais très malin, et Bouki l'hyène, grosse et forte mais pas très intelligente.
 
 Un jour, les deux amis décidèrent de creuser un puits ensemble car la saison sèche approchait et l'eau se faisait rare. Ils travaillèrent dur sous le soleil brûlant, Bouki creusant avec sa force et Leuk l'encourageant avec ses mots.
 
@@ -86,7 +87,7 @@ Cette histoire nous enseigne l'importance de la sagesse, de la prudence et du re
       estimatedAudioDuration: 5,
       values: ['Sagesse', 'Prudence', 'Amitié'],
       quizQuestions: [],
-      metadata: StoryMetadata(
+      metadata: const StoryMetadata(
         author: 'Conte traditionnel sénégalais',
         origin: 'Senegal',
         moralLesson: 'La ruse ne doit pas nuire à l\'amitié',
@@ -107,11 +108,11 @@ Cette histoire nous enseigne l'importance de la sagesse, de la prudence et du re
   @override
   Widget build(BuildContext context) {
     final theme = _isDarkMode ? ThemeData.dark() : Theme.of(context);
-    
+
     return Theme(
       data: theme,
       child: Scaffold(
-        backgroundColor: _isDarkMode ? Colors.black : theme.colorScheme.background,
+        backgroundColor: _isDarkMode ? Colors.black : theme.colorScheme.surface,
         appBar: AppBar(
           title: const Text('Lecture'),
           backgroundColor: _isDarkMode ? Colors.grey[900] : null,
@@ -139,12 +140,12 @@ Cette histoire nous enseigne l'importance de la sagesse, de la prudence et du re
                 }
               },
               itemBuilder: (context) => [
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'font_size',
                   child: Row(
                     children: [
-                      const Icon(Icons.format_size),
-                      const SizedBox(width: 8),
+                      Icon(Icons.format_size),
+                      SizedBox(width: 8),
                       Text('Taille de police'),
                     ],
                   ),
@@ -159,12 +160,12 @@ Cette histoire nous enseigne l'importance de la sagesse, de la prudence et du re
                     ],
                   ),
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'scroll_top',
                   child: Row(
                     children: [
-                      const Icon(Icons.vertical_align_top),
-                      const SizedBox(width: 8),
+                      Icon(Icons.vertical_align_top),
+                      SizedBox(width: 8),
                       Text('Retour en haut'),
                     ],
                   ),
@@ -191,9 +192,9 @@ Cette histoire nous enseigne l'importance de la sagesse, de la prudence et du re
                             fontSize: _fontSize + 8,
                           ),
                         ),
-                        
+
                         const SizedBox(height: 8),
-                        
+
                         // Métadonnées
                         Row(
                           children: [
@@ -215,7 +216,8 @@ Cette histoire nous enseigne l'importance de la sagesse, de la prudence et du re
                             Icon(
                               Icons.schedule,
                               size: 16,
-                              color: theme.colorScheme.onSurface.withOpacity(0.6),
+                              color:
+                                  theme.colorScheme.onSurface.withOpacity(0.6),
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -226,9 +228,9 @@ Cette histoire nous enseigne l'importance de la sagesse, de la prudence et du re
                             ),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 32),
-                        
+
                         // Contenu de l'histoire
                         SelectableText(
                           _story!.content['fr'] ?? '',
@@ -238,7 +240,7 @@ Cette histoire nous enseigne l'importance de la sagesse, de la prudence et du re
                             letterSpacing: 0.3,
                           ),
                         ),
-                        
+
                         const SizedBox(height: 48),
                       ],
                     ),

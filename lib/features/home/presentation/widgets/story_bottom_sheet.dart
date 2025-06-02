@@ -15,7 +15,7 @@ class StoryBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final mediaQuery = MediaQuery.of(context);
-    
+
     return Container(
       height: mediaQuery.size.height * 0.8,
       decoration: BoxDecoration(
@@ -34,7 +34,7 @@ class StoryBottomSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -62,9 +62,9 @@ class StoryBottomSheet extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Titre et pays
                   Text(
                     story.title,
@@ -72,9 +72,9 @@ class StoryBottomSheet extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   Row(
                     children: [
                       Icon(
@@ -92,34 +92,34 @@ class StoryBottomSheet extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Métadonnées
                   _MetadataRow(
                     icon: Icons.schedule,
                     label: 'Lecture',
                     value: '${story.estimatedReadingTime} min',
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   _MetadataRow(
                     icon: Icons.headphones,
                     label: 'Audio',
                     value: '${story.estimatedAudioDuration} min',
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   _MetadataRow(
                     icon: Icons.child_care,
                     label: 'Âge',
                     value: story.metadata.ageGroup,
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Valeurs transmises
                   Text(
                     'Valeurs transmises',
@@ -127,24 +127,27 @@ class StoryBottomSheet extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: story.values.map((value) => Chip(
-                      label: Text(value),
-                      backgroundColor: theme.colorScheme.primaryContainer,
-                      labelStyle: TextStyle(
-                        color: theme.colorScheme.onPrimaryContainer,
-                        fontSize: 12,
-                      ),
-                    )).toList(),
+                    children: story.values
+                        .map((value) => Chip(
+                              label: Text(value),
+                              backgroundColor:
+                                  theme.colorScheme.primaryContainer,
+                              labelStyle: TextStyle(
+                                color: theme.colorScheme.onPrimaryContainer,
+                                fontSize: 12,
+                              ),
+                            ))
+                        .toList(),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Description/leçon morale
                   Text(
                     'Leçon morale',
@@ -152,13 +155,13 @@ class StoryBottomSheet extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceVariant,
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -168,13 +171,13 @@ class StoryBottomSheet extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
                 ],
               ),
             ),
           ),
-          
+
           // Boutons d'action
           Container(
             padding: const EdgeInsets.all(24),
@@ -186,7 +189,7 @@ class StoryBottomSheet extends StatelessWidget {
                 ),
               ),
             ),
-            child: story.isUnlocked 
+            child: story.isUnlocked
                 ? _ActionButtons(story: story)
                 : _LockedMessage(theme: theme),
           ),
@@ -210,7 +213,7 @@ class _MetadataRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Row(
       children: [
         Icon(
@@ -260,9 +263,7 @@ class _ActionButtons extends StatelessWidget {
                 ),
               ),
             ),
-            
             const SizedBox(width: 16),
-            
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: () {
@@ -278,9 +279,9 @@ class _ActionButtons extends StatelessWidget {
             ),
           ],
         ),
-        
+
         const SizedBox(height: 12),
-        
+
         // Bouton secondaire pour fermer
         TextButton(
           onPressed: () => context.pop(),
@@ -324,9 +325,7 @@ class _LockedMessage extends StatelessWidget {
             ],
           ),
         ),
-        
         const SizedBox(height: 16),
-        
         TextButton(
           onPressed: () => context.pop(),
           child: const Text('Fermer'),

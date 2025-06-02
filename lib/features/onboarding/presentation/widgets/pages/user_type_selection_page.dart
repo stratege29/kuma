@@ -42,51 +42,53 @@ class UserTypeSelectionPage extends StatelessWidget {
           Expanded(
             child: BlocBuilder<OnboardingBloc, OnboardingState>(
               builder: (context, state) {
-                return Column(
-                  children: [
-                    _UserTypeOption(
-                      icon: Icons.family_restroom,
-                      title: 'Parent',
-                      subtitle: 'Je lis avec mes enfants et gère leurs profils',
-                      value: AppConstants.USER_TYPE_PARENT,
-                      selectedValue: state.userType,
-                      onTap: (value) {
-                        context.read<OnboardingBloc>().add(
-                          OnboardingEvent.selectUserType(value),
-                        );
-                      },
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    
-                    _UserTypeOption(
-                      icon: Icons.school,
-                      title: 'Enseignant(e)',
-                      subtitle: 'J\'utilise Kuma dans ma classe ou pour l\'éducation',
-                      value: AppConstants.USER_TYPE_TEACHER,
-                      selectedValue: state.userType,
-                      onTap: (value) {
-                        context.read<OnboardingBloc>().add(
-                          OnboardingEvent.selectUserType(value),
-                        );
-                      },
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    
-                    _UserTypeOption(
-                      icon: Icons.child_care,
-                      title: 'Enfant',
-                      subtitle: 'Je veux découvrir les contes africains',
-                      value: AppConstants.USER_TYPE_CHILD,
-                      selectedValue: state.userType,
-                      onTap: (value) {
-                        context.read<OnboardingBloc>().add(
-                          OnboardingEvent.selectUserType(value),
-                        );
-                      },
-                    ),
-                  ],
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _UserTypeOption(
+                        icon: Icons.family_restroom,
+                        title: 'Parent',
+                        subtitle: 'Je lis avec mes enfants et gère leurs profils',
+                        value: AppConstants.USER_TYPE_PARENT,
+                        selectedValue: state.userType,
+                        onTap: (value) {
+                          context.read<OnboardingBloc>().add(
+                            OnboardingEvent.selectUserType(value),
+                          );
+                        },
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      _UserTypeOption(
+                        icon: Icons.school,
+                        title: 'Enseignant(e)',
+                        subtitle: 'J\'utilise Kuma dans ma classe ou pour l\'éducation',
+                        value: AppConstants.USER_TYPE_TEACHER,
+                        selectedValue: state.userType,
+                        onTap: (value) {
+                          context.read<OnboardingBloc>().add(
+                            OnboardingEvent.selectUserType(value),
+                          );
+                        },
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      _UserTypeOption(
+                        icon: Icons.child_care,
+                        title: 'Enfant',
+                        subtitle: 'Je veux découvrir les contes africains',
+                        value: AppConstants.USER_TYPE_CHILD,
+                        selectedValue: state.userType,
+                        onTap: (value) {
+                          context.read<OnboardingBloc>().add(
+                            OnboardingEvent.selectUserType(value),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 );
               },
             ),

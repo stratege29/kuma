@@ -25,7 +25,7 @@ class _QuizResultPageState extends State<QuizResultPage>
   int _score = 0;
   int _total = 3;
   bool _passed = false;
-  String _currentCountry = 'Senegal';
+  final String _currentCountry = 'Senegal';
   String _nextCountry = '';
 
   @override
@@ -39,11 +39,11 @@ class _QuizResultPageState extends State<QuizResultPage>
   void _parseQueryParameters() {
     final location = GoRouterState.of(context);
     final params = location.uri.queryParameters;
-    
+
     _score = int.tryParse(params['score'] ?? '0') ?? 0;
     _total = int.tryParse(params['total'] ?? '3') ?? 3;
     _passed = params['passed'] == 'true';
-    
+
     if (_passed) {
       _nextCountry = Countries.getNextCountry(_currentCountry);
     }
@@ -80,7 +80,7 @@ class _QuizResultPageState extends State<QuizResultPage>
   void _startAnimations() {
     Future.delayed(const Duration(milliseconds: 500), () {
       _scaleAnimationController.forward();
-      
+
       if (_passed) {
         _confettiAnimationController.repeat();
       }
@@ -97,7 +97,7 @@ class _QuizResultPageState extends State<QuizResultPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Résultat du Quiz'),
@@ -111,8 +111,8 @@ class _QuizResultPageState extends State<QuizResultPage>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: _passed
-                ? [Colors.green.withOpacity(0.1), theme.colorScheme.background]
-                : [Colors.orange.withOpacity(0.1), theme.colorScheme.background],
+                ? [Colors.green.withOpacity(0.1), theme.colorScheme.surface]
+                : [Colors.orange.withOpacity(0.1), theme.colorScheme.surface],
           ),
         ),
         child: SafeArea(
@@ -137,9 +137,9 @@ class _QuizResultPageState extends State<QuizResultPage>
                           );
                         },
                       ),
-                      
+
                       const SizedBox(height: 32),
-                      
+
                       // Score
                       AnimatedBuilder(
                         animation: _scaleAnimationController,
@@ -150,30 +150,34 @@ class _QuizResultPageState extends State<QuizResultPage>
                               children: [
                                 Text(
                                   _passed ? 'Félicitations !' : 'Pas mal !',
-                                  style: theme.textTheme.headlineMedium?.copyWith(
+                                  style:
+                                      theme.textTheme.headlineMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: _passed ? Colors.green : Colors.orange,
+                                    color:
+                                        _passed ? Colors.green : Colors.orange,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
-                                
+
                                 const SizedBox(height: 16),
-                                
+
                                 Text(
                                   'Votre score : $_score/$_total',
-                                  style: theme.textTheme.headlineSmall?.copyWith(
+                                  style:
+                                      theme.textTheme.headlineSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                
+
                                 const SizedBox(height: 8),
-                                
+
                                 // Barre de progression du score
                                 Container(
                                   width: 200,
                                   height: 8,
                                   decoration: BoxDecoration(
-                                    color: theme.colorScheme.outline.withOpacity(0.2),
+                                    color: theme.colorScheme.outline
+                                        .withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: FractionallySizedBox(
@@ -181,7 +185,9 @@ class _QuizResultPageState extends State<QuizResultPage>
                                     widthFactor: _score / _total,
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: _passed ? Colors.green : Colors.orange,
+                                        color: _passed
+                                            ? Colors.green
+                                            : Colors.orange,
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                     ),
@@ -192,9 +198,9 @@ class _QuizResultPageState extends State<QuizResultPage>
                           );
                         },
                       ),
-                      
+
                       const SizedBox(height: 32),
-                      
+
                       // Message selon le résultat
                       AnimatedBuilder(
                         animation: _scaleAnimationController,
@@ -212,7 +218,7 @@ class _QuizResultPageState extends State<QuizResultPage>
                     ],
                   ),
                 ),
-                
+
                 // Boutons d'action
                 AnimatedBuilder(
                   animation: _scaleAnimationController,
@@ -229,7 +235,7 @@ class _QuizResultPageState extends State<QuizResultPage>
                     );
                   },
                 ),
-                
+
                 // Effets de confettis si réussi
                 if (_passed)
                   Positioned.fill(
@@ -237,7 +243,8 @@ class _QuizResultPageState extends State<QuizResultPage>
                       animation: _confettiAnimationController,
                       builder: (context, child) {
                         return CustomPaint(
-                          painter: ConfettiPainter(_confettiAnimationController.value),
+                          painter: ConfettiPainter(
+                              _confettiAnimationController.value),
                         );
                       },
                     ),
@@ -315,7 +322,7 @@ class _ResultMessage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant,
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -325,9 +332,7 @@ class _ResultMessage extends StatelessWidget {
             color: passed ? Colors.green : Colors.orange,
             size: 32,
           ),
-          
           const SizedBox(height: 12),
-          
           Text(
             passed
                 ? 'Excellent ! Vous avez débloqué $nextCountry !'
@@ -337,9 +342,7 @@ class _ResultMessage extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          
           const SizedBox(height: 8),
-          
           Text(
             passed
                 ? 'Votre voyage à travers l\'Afrique continue. Prêt pour de nouvelles aventures ?'
@@ -388,9 +391,7 @@ class _ActionButtons extends StatelessWidget {
               ),
             ),
           ),
-          
           const SizedBox(height: 12),
-          
           TextButton(
             onPressed: onReread,
             child: const Text('Relire l\'histoire'),
@@ -414,9 +415,7 @@ class _ActionButtons extends StatelessWidget {
                   ),
                 ),
               ),
-              
               const SizedBox(width: 16),
-              
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: onReread,
@@ -429,9 +428,7 @@ class _ActionButtons extends StatelessWidget {
               ),
             ],
           ),
-          
           const SizedBox(height: 12),
-          
           TextButton(
             onPressed: onContinue,
             child: const Text('Retour à la carte'),
@@ -450,15 +447,22 @@ class ConfettiPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..style = PaintingStyle.fill;
-    
-    final colors = [Colors.red, Colors.blue, Colors.green, Colors.yellow, Colors.purple];
-    
+
+    final colors = [
+      Colors.red,
+      Colors.blue,
+      Colors.green,
+      Colors.yellow,
+      Colors.purple
+    ];
+
     for (int i = 0; i < 50; i++) {
       paint.color = colors[i % colors.length];
-      
-      final x = (size.width * (i % 10) / 10) + (animationValue * 100) % size.width;
+
+      final x =
+          (size.width * (i % 10) / 10) + (animationValue * 100) % size.width;
       final y = (size.height * animationValue + i * 10) % size.height;
-      
+
       canvas.drawCircle(Offset(x, y), 3, paint);
     }
   }

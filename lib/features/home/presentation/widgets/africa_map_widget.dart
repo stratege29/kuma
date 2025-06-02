@@ -160,11 +160,9 @@ class _AfricaMapWidgetState extends State<AfricaMapWidget>
                     top: position['y']! * MediaQuery.of(context).size.height * 1.4,
                     child: StoryCardWidget(
                       story: story,
-                      isUnlocked: state.unlockedCountries.contains(story.country),
+                      state: _getStoryState(story.country, state),
                       onTap: () {
-                        if (state.unlockedCountries.contains(story.country)) {
-                          context.read<HomeBloc>().add(HomeEvent.selectStory(story));
-                        }
+                        context.read<HomeBloc>().add(HomeEvent.selectStory(story));
                       },
                     ),
                   );
@@ -203,6 +201,20 @@ class _AfricaMapWidgetState extends State<AfricaMapWidget>
         );
       },
     );
+  }
+
+  String _getStoryState(String countryName, HomeState state) {
+    if (state.completedCountries.contains(countryName)) {
+      return Countries.STORY_STATE_COMPLETED;
+    }
+    
+    if (state.unlockedCountries.contains(countryName)) {
+      return Countries.STORY_STATE_UNLOCKED;
+    }
+    
+    // For the original map widget, show locked state for unselected countries
+    // In a real app, this would check premium status and time-based unlocking
+    return Countries.STORY_STATE_VISIBLE_LOCKED;
   }
 }
 

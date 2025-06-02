@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_core/firebase_core.dart';
 import 'package:kuma/core/di/injection_container.dart' as di;
 import 'package:kuma/core/theme/app_theme.dart';
 import 'package:kuma/core/utils/app_router.dart';
@@ -8,15 +8,15 @@ import 'package:kuma/core/utils/app_router.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Configuration Firebase (placeholder)
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: "YOUR_API_KEY",
-      appId: "YOUR_APP_ID",
-      messagingSenderId: "YOUR_SENDER_ID",
-      projectId: "YOUR_PROJECT_ID",
-    ),
-  );
+  // Configuration Firebase (temporarily disabled for testing)
+  // await Firebase.initializeApp(
+  //   options: const FirebaseOptions(
+  //     apiKey: "YOUR_API_KEY",
+  //     appId: "YOUR_APP_ID",
+  //     messagingSenderId: "YOUR_SENDER_ID",
+  //     projectId: "YOUR_PROJECT_ID",
+  //   ),
+  // );
   
   // Initialize dependencies
   await di.init();

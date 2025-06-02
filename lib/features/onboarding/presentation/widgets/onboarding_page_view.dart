@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kuma/features/onboarding/presentation/widgets/pages/welcome_page.dart';
 import 'package:kuma/features/onboarding/presentation/widgets/pages/user_type_selection_page.dart';
 import 'package:kuma/features/onboarding/presentation/widgets/pages/children_setup_page.dart';
 import 'package:kuma/features/onboarding/presentation/widgets/pages/goal_selection_page.dart';
@@ -24,6 +25,7 @@ class OnboardingPageView extends StatelessWidget {
       onPageChanged: onPageChanged,
       physics: const NeverScrollableScrollPhysics(), // Désactive le swipe
       children: const [
+        WelcomePage(),
         UserTypeSelectionPage(),
         ChildrenSetupPage(),
         GoalSelectionPage(),

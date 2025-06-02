@@ -20,16 +20,23 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async {
     emit(state.copyWith(isLoading: true));
-    
+
     try {
       // Pour l'instant, on utilise des données mock
       final stories = _generateMockStories();
 
+<<<<<<< HEAD
       // Utiliser le pays de départ fourni s'il existe
       final startingCountry = event.startingCountry ?? '';
       final unlockedCountries =
           startingCountry.isNotEmpty ? [startingCountry] : [];
       
+=======
+      // Simuler le pays de départ (pour l'instant Senegal)
+      const startingCountry = 'Senegal';
+      final unlockedCountries = [startingCountry];
+
+>>>>>>> 8586361 (onbarding ok)
       emit(state.copyWith(
         stories: stories,
         currentCountry: startingCountry,
@@ -69,14 +76,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
       return story;
     }).toList();
-    
+
     // Déterminer le prochain pays à débloquer
     final nextCountry = Countries.getNextCountry(state.currentCountry);
     final updatedUnlockedCountries = [...state.unlockedCountries];
     if (!updatedUnlockedCountries.contains(nextCountry)) {
       updatedUnlockedCountries.add(nextCountry);
     }
-    
+
     emit(state.copyWith(
       stories: updatedStories,
       currentCountry: nextCountry,
@@ -92,8 +99,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         country: country,
         countryCode: Countries.COUNTRY_ORDER[country] ?? '',
         content: {'fr': _getStoryContent(country)},
-        imageUrl: 'placeholder_${Countries.COUNTRY_ORDER[country]?.toLowerCase()}_1.jpg',
-        audioUrl: 'placeholder_${Countries.COUNTRY_ORDER[country]?.toLowerCase()}_1.mp3',
+        imageUrl:
+            'placeholder_${Countries.COUNTRY_ORDER[country]?.toLowerCase()}_1.jpg',
+        audioUrl:
+            'placeholder_${Countries.COUNTRY_ORDER[country]?.toLowerCase()}_1.mp3',
         estimatedReadingTime: 4,
         estimatedAudioDuration: 5,
         values: ['Courage', 'Sagesse'],
@@ -125,9 +134,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   String _getStoryContent(String country) {
     return '''Il était une fois, dans le magnifique pays de $country, une histoire extraordinaire qui se transmettait de génération en génération.
 
-Cette histoire raconte la sagesse de nos ancêtres et les valeurs importantes de notre culture africaine. Les personnages de ce conte nous enseignent que la ruse et l\'intelligence peuvent triompher de la force brute.
+Cette histoire raconte la sagesse de nos ancêtres et les valeurs importantes de notre culture africaine. Les personnages de ce conte nous enseignent que la ruse et l'intelligence peuvent triompher de la force brute.
 
-À travers les aventures captivantes de nos héros, nous découvrons l\'importance du respect, de la solidarité et de la persévérance. Ces valeurs sont au cœur de la tradition orale africaine.
+À travers les aventures captivantes de nos héros, nous découvrons l'importance du respect, de la solidarité et de la persévérance. Ces valeurs sont au cœur de la tradition orale africaine.
 
 Le conte se déroule dans un village paisible où la communauté vit en harmonie avec la nature. Les anciens transmettent leur sagesse aux plus jeunes à travers ces récits merveilleux.
 
@@ -161,12 +170,7 @@ Cette histoire nous rappelle que chaque défi peut être surmonté avec de la cr
       QuizQuestion(
         id: '${country}_q3',
         question: 'Quelle valeur est mise en avant dans ce conte ?',
-        options: [
-          'La paresse',
-          'L\'égoïsme',
-          'La sagesse',
-          'La colère'
-        ],
+        options: ['La paresse', 'L\'égoïsme', 'La sagesse', 'La colère'],
         correctAnswer: 2,
       ),
     ];
