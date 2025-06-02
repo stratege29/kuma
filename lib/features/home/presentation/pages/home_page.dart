@@ -1,0 +1,107 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kuma/features/home/presentation/bloc/home_bloc.dart';
+import 'package:kuma/features/home/presentation/widgets/africa_map_widget.dart';
+import 'package:kuma/features/home/presentation/widgets/story_bottom_sheet.dart';
+import 'package:kuma/shared/domain/entities/story.dart';
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => HomeBloc()..add(const HomeEvent.loadStories()),
+      child: const HomeView(),
+    );
+  }
+}
+
+class HomeView extends StatefulWidget {
+  const HomeView({super.key});
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Icon(
+              Icons.auto_stories,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            const Text('KUMA'),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              // Navigation vers profil
+            },
+          ),
+        ],
+      ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          BlocConsumer<HomeBloc, HomeState>(
+            listener: (context, state) {
+              if (state.selectedStory != null) {
+                _showStoryBottomSheet(context, state.selectedStory!);
+              }
+            },
+            builder: (context, state) {
+              return const AfricaMapWidget();
+            },
+          ),
+          const Center(child: Text('Catalogue - À implémenter')),
+          const Center(child: Text('Profil - À implémenter')),
+        ],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.map),
+            label: 'Carte',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.library_books),
+            label: 'Catalogue',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person),
+            label: 'Profil',
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showStoryBottomSheet(BuildContext context, Story story) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => StoryBottomSheet(story: story),
+    ).then((_) {
+      // Clear la sélection quand le bottom sheet se ferme
+      context.read<HomeBloc>().add(const HomeEvent.clearSelection());
+    });
+  }
+}

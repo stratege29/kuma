@@ -1,0 +1,69 @@
+class AppConstants {
+  // Firebase Configuration (placeholder)
+  static const String FIREBASE_PROJECT_ID = "YOUR_PROJECT_ID";
+  static const String FIREBASE_API_KEY = "YOUR_API_KEY";
+  static const String FIREBASE_APP_ID = "YOUR_APP_ID";
+  static const String FIREBASE_MESSAGING_SENDER_ID = "YOUR_SENDER_ID";
+  
+  // Collections Firestore
+  static const String COLLECTION_STORIES = "stories";
+  static const String COLLECTION_USERS = "users";
+  static const String COLLECTION_PROGRESS = "progress";
+  
+  // Quiz Configuration
+  static const int QUIZ_QUESTIONS_COUNT = 3;
+  static const int QUIZ_PASSING_SCORE = 2;
+  static const int QUIZ_OPTIONS_COUNT = 4;
+  
+  // Progression
+  static const int MAX_CHILDREN = 5;
+  
+  // Cache Keys
+  static const String CACHE_USER_SETTINGS = "user_settings";
+  static const String CACHE_PROGRESS = "progress";
+  static const String CACHE_STORIES = "stories";
+  
+  // Routes
+  static const String ROUTE_SPLASH = "/";
+  static const String ROUTE_ONBOARDING = "/onboarding";
+  static const String ROUTE_HOME = "/home";
+  static const String ROUTE_STORY_DETAIL = "/story";
+  static const String ROUTE_READING = "/reading";
+  static const String ROUTE_LISTENING = "/listening";
+  static const String ROUTE_QUIZ = "/quiz";
+  static const String ROUTE_QUIZ_RESULT = "/quiz-result";
+  
+  // Story Types
+  static const String STORY_TYPE_TEXT = "text";
+  static const String STORY_TYPE_AUDIO = "audio";
+  
+  // User Types
+  static const String USER_TYPE_PARENT = "parent";
+  static const String USER_TYPE_TEACHER = "teacher";
+  static const String USER_TYPE_CHILD = "child";
+  
+  // Reading Goals
+  static const List<String> READING_GOALS = [
+    "Apprendre sur la culture africaine",
+    "Améliorer la lecture",
+    "Découvrir de nouvelles histoires",
+    "Passer du temps en famille"
+  ];
+  
+  // Reading Times
+  static const List<String> READING_TIMES = [
+    "Matin (7h-10h)",
+    "Après-midi (14h-17h)",
+    "Soir (18h-21h)",
+    "Avant le coucher (21h-23h)"
+  ];
+  
+  // Avatar Options
+  static const List<String> AVATAR_OPTIONS = [
+    "avatar_boy_1",
+    "avatar_boy_2", 
+    "avatar_girl_1",
+    "avatar_girl_2",
+    "avatar_neutral_1"
+  ];
+}
