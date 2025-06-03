@@ -1,9 +1,7 @@
 class AppConstants {
-  // Firebase Configuration (placeholder)
-  static const String FIREBASE_PROJECT_ID = "YOUR_PROJECT_ID";
-  static const String FIREBASE_API_KEY = "YOUR_API_KEY";
-  static const String FIREBASE_APP_ID = "YOUR_APP_ID";
-  static const String FIREBASE_MESSAGING_SENDER_ID = "YOUR_SENDER_ID";
+  // Firebase Configuration
+  static const String FIREBASE_PROJECT_ID = "kumafire-7864b";
+  static const String FIREBASE_MESSAGING_SENDER_ID = "116620596804";
   
   // Collections Firestore
   static const String COLLECTION_STORIES = "stories";

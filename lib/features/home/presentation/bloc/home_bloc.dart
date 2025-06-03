@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kuma/shared/domain/entities/story.dart';
 import 'package:kuma/core/constants/countries.dart';
+import 'package:kuma/features/onboarding/presentation/bloc/onboarding_bloc.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
@@ -115,7 +116,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           ageGroup: '6-12 ans',
           difficulty: 'Facile',
         ),
-        isUnlocked: country == 'Senegal', // Première histoire débloquée
+        isUnlocked: country == (UserSettingsStore.getSettings()?.startingCountry ?? 'Senegal'), // Première histoire débloquée
       );
     }).toList();
   }

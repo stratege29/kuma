@@ -2,16 +2,16 @@ import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kuma/core/error/failure.dart';
 import 'package:kuma/features/auth/data/datasources/auth_local_data_source.dart';
-import 'package:kuma/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:kuma/features/auth/data/datasources/auth_remote_data_source_v2.dart';
 import 'package:kuma/features/auth/domain/repositories/auth_repository.dart';
 import 'package:kuma/shared/domain/entities/user.dart';
 import 'package:kuma/features/onboarding/presentation/bloc/onboarding_bloc.dart';
 
-class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource remoteDataSource;
+class AuthRepositoryImplV2 implements AuthRepository {
+  final AuthRemoteDataSourceV2 remoteDataSource;
   final AuthLocalDataSource localDataSource;
 
-  AuthRepositoryImpl({
+  AuthRepositoryImplV2({
     required this.remoteDataSource,
     required this.localDataSource,
   });
@@ -26,7 +26,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final updatedUser = existingUser.copyWith(
         lastLoginAt: DateTime.now(),
       );
-      await remoteDataSource.saveUserData(updatedUser);
+      await remoteDataSource.updateUserData(updatedUser);
       return updatedUser;
     }
     
@@ -65,10 +65,16 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, AppUser>> signInAnonymously() async {
     try {
+      print('AuthRepository: Starting anonymous sign-in...');
       final firebaseUser = await remoteDataSource.signInAnonymously();
+      print('AuthRepository: Anonymous Firebase user created: ${firebaseUser.uid}');
+      
+      print('AuthRepository: Creating/updating app user...');
       final appUser = await _createOrUpdateAppUser(firebaseUser, isNewUser: true);
+      print('AuthRepository: App user created: ${appUser.id}');
       return Right(appUser);
     } catch (e) {
+      print('AuthRepository: Error in signInAnonymously: $e');
       return Left(AuthFailure(
         message: 'Erreur lors de la connexion anonyme: ${e.toString()}',
       ));
@@ -77,64 +83,174 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, AppUser>> signInWithGoogle() async {
-    return Left(AuthFailure(
-      message: 'Google Sign-In non implémenté dans cette version',
-    ));
+    try {
+      final firebaseUser = await remoteDataSource.signInWithGoogle();
+      final appUser = await _createOrUpdateAppUser(firebaseUser);
+      return Right(appUser);
+    } catch (e) {
+      return Left(AuthFailure(
+        message: 'Erreur lors de la connexion Google: ${e.toString()}',
+      ));
+    }
   }
 
   @override
   Future<Either<Failure, AppUser>> signInWithApple() async {
-    return Left(AuthFailure(
-      message: 'Apple Sign-In non implémenté dans cette version',
-    ));
+    try {
+      final firebaseUser = await remoteDataSource.signInWithApple();
+      final appUser = await _createOrUpdateAppUser(firebaseUser);
+      return Right(appUser);
+    } catch (e) {
+      return Left(AuthFailure(
+        message: 'Erreur lors de la connexion Apple: ${e.toString()}',
+      ));
+    }
   }
 
   @override
   Future<Either<Failure, AppUser>> signInWithEmailPassword(String email, String password) async {
-    return Left(AuthFailure(
-      message: 'Email/Password Sign-In non implémenté dans cette version',
-    ));
+    try {
+      final firebaseUser = await remoteDataSource.signInWithEmailPassword(email, password);
+      final appUser = await _createOrUpdateAppUser(firebaseUser);
+      return Right(appUser);
+    } catch (e) {
+      return Left(AuthFailure(
+        message: e.toString(),
+      ));
+    }
   }
 
   @override
   Future<Either<Failure, AppUser>> signUpWithEmailPassword(String email, String password) async {
-    return Left(AuthFailure(
-      message: 'Email/Password Sign-Up non implémenté dans cette version',
-    ));
+    try {
+      final firebaseUser = await remoteDataSource.signUpWithEmailPassword(email, password);
+      final appUser = await _createOrUpdateAppUser(firebaseUser, isNewUser: true);
+      return Right(appUser);
+    } catch (e) {
+      return Left(AuthFailure(
+        message: e.toString(),
+      ));
+    }
   }
 
   @override
   Future<Either<Failure, AppUser>> linkWithGoogle() async {
-    return Left(AuthFailure(
-      message: 'Link with Google non implémenté dans cette version',
-    ));
+    try {
+      final currentFirebaseUser = await remoteDataSource.getCurrentUser();
+      if (currentFirebaseUser == null) {
+        return const Left(AuthFailure(message: 'Aucun utilisateur connecté'));
+      }
+
+      // Get current user data before linking
+      final currentUserData = await remoteDataSource.getUserData(currentFirebaseUser.uid);
+      if (currentUserData == null) {
+        return const Left(AuthFailure(message: 'Données utilisateur introuvables'));
+      }
+
+      // Link with Google
+      final linkedUser = await remoteDataSource.linkWithGoogle();
+      
+      // Update user data with new email if available
+      final updatedUser = currentUserData.copyWith(
+        email: linkedUser.email ?? currentUserData.email,
+      );
+      
+      await remoteDataSource.updateUserData(updatedUser);
+      return Right(updatedUser);
+    } catch (e) {
+      return Left(AuthFailure(
+        message: e.toString(),
+      ));
+    }
   }
 
   @override
   Future<Either<Failure, AppUser>> linkWithApple() async {
-    return Left(AuthFailure(
-      message: 'Link with Apple non implémenté dans cette version',
-    ));
+    try {
+      final currentFirebaseUser = await remoteDataSource.getCurrentUser();
+      if (currentFirebaseUser == null) {
+        return const Left(AuthFailure(message: 'Aucun utilisateur connecté'));
+      }
+
+      // Get current user data before linking
+      final currentUserData = await remoteDataSource.getUserData(currentFirebaseUser.uid);
+      if (currentUserData == null) {
+        return const Left(AuthFailure(message: 'Données utilisateur introuvables'));
+      }
+
+      // Link with Apple
+      final linkedUser = await remoteDataSource.linkWithApple();
+      
+      // Update user data with new email if available
+      final updatedUser = currentUserData.copyWith(
+        email: linkedUser.email ?? currentUserData.email,
+      );
+      
+      await remoteDataSource.updateUserData(updatedUser);
+      return Right(updatedUser);
+    } catch (e) {
+      return Left(AuthFailure(
+        message: e.toString(),
+      ));
+    }
   }
 
   @override
   Future<Either<Failure, AppUser>> linkWithEmailPassword(String email, String password) async {
-    return Left(AuthFailure(
-      message: 'Link with Email/Password non implémenté dans cette version',
-    ));
+    try {
+      final currentFirebaseUser = await remoteDataSource.getCurrentUser();
+      if (currentFirebaseUser == null) {
+        return const Left(AuthFailure(message: 'Aucun utilisateur connecté'));
+      }
+
+      // Get current user data before linking
+      final currentUserData = await remoteDataSource.getUserData(currentFirebaseUser.uid);
+      if (currentUserData == null) {
+        return const Left(AuthFailure(message: 'Données utilisateur introuvables'));
+      }
+
+      // Link with email/password
+      final linkedUser = await remoteDataSource.linkWithEmailPassword(email, password);
+      
+      // Update user data with new email
+      final updatedUser = currentUserData.copyWith(email: email);
+      
+      await remoteDataSource.updateUserData(updatedUser);
+      return Right(updatedUser);
+    } catch (e) {
+      return Left(AuthFailure(
+        message: e.toString(),
+      ));
+    }
   }
 
   @override
   Future<Either<Failure, AppUser?>> getCurrentUser() async {
     try {
+      print('AuthRepository: Getting current Firebase user...');
       final firebaseUser = await remoteDataSource.getCurrentUser();
+      print('AuthRepository: Firebase user: ${firebaseUser?.uid}');
+      
       if (firebaseUser == null) {
+        print('AuthRepository: No Firebase user found');
         return const Right(null);
       }
 
+      print('AuthRepository: Getting user data for: ${firebaseUser.uid}');
       final appUser = await remoteDataSource.getUserData(firebaseUser.uid);
+      print('AuthRepository: App user found: ${appUser?.id}');
+      
+      // If Firebase user exists but no app user document, create it
+      if (appUser == null) {
+        print('AuthRepository: Creating missing user document for existing Firebase user');
+        final newUser = await _createOrUpdateAppUser(firebaseUser, isNewUser: true);
+        print('AuthRepository: Created user document: ${newUser.id}');
+        return Right(newUser);
+      }
+      
       return Right(appUser);
     } catch (e) {
+      print('AuthRepository: Error in getCurrentUser: $e');
       return Left(UnknownFailure(
         message: 'Erreur lors de la récupération de l\'utilisateur: ${e.toString()}',
       ));
@@ -168,7 +284,7 @@ class AuthRepositoryImpl implements AuthRepository {
         final userData = await remoteDataSource.getUserData(firebaseUser.uid);
         if (userData != null) {
           final updatedUser = userData.copyWith(settings: settings);
-          await remoteDataSource.saveUserData(updatedUser);
+          await remoteDataSource.updateUserData(updatedUser);
         }
       }
       
@@ -218,7 +334,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> updateUserData(AppUser user) async {
     try {
-      await remoteDataSource.saveUserData(user);
+      await remoteDataSource.updateUserData(user);
       
       // Update local cache
       await localDataSource.cacheUserSettings(user.settings);
@@ -234,22 +350,28 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, void>> sendPasswordResetEmail(String email) async {
-    return Left(AuthFailure(
-      message: 'Password reset non implémenté dans cette version',
-    ));
+    try {
+      await remoteDataSource.sendPasswordResetEmail(email);
+      return const Right(null);
+    } catch (e) {
+      return Left(AuthFailure(
+        message: e.toString(),
+      ));
+    }
   }
 
   @override
   Future<Either<Failure, List<String>>> getAuthProviders(String email) async {
-    return const Right([]);
+    try {
+      final providers = await remoteDataSource.getAuthProviders(email);
+      return Right(providers);
+    } catch (e) {
+      return Left(UnknownFailure(
+        message: 'Erreur lors de la vérification: ${e.toString()}',
+      ));
+    }
   }
 
   @override
-  Stream<User?> get authStateChanges {
-    try {
-      return FirebaseAuth.instance.authStateChanges();
-    } catch (e) {
-      return Stream.error(e);
-    }
-  }
+  Stream<User?> get authStateChanges => remoteDataSource.authStateChanges;
 }

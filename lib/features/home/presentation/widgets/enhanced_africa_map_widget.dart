@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kuma/core/constants/countries.dart';
@@ -23,6 +25,8 @@ class _EnhancedAfricaMapWidgetState extends State<EnhancedAfricaMapWidget>
   late final AnimationController _routeAnimationController;
   
   final MapConfig _mapConfig = const MapConfig();
+  bool _showEntryAnimation = true;
+  Timer? _safetyTimer;
   
   @override
   void initState() {
@@ -39,6 +43,24 @@ class _EnhancedAfricaMapWidgetState extends State<EnhancedAfricaMapWidget>
       vsync: this,
     );
 
+    // Listen for animation completion
+    _entryAnimationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          _showEntryAnimation = false;
+        });
+      }
+    });
+
+    // Add a safety timeout to prevent getting stuck
+    _safetyTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted && _showEntryAnimation) {
+        setState(() {
+          _showEntryAnimation = false;
+        });
+      }
+    });
+
     // Start entry animation
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _playEntryAnimation();
@@ -47,6 +69,7 @@ class _EnhancedAfricaMapWidgetState extends State<EnhancedAfricaMapWidget>
 
   @override
   void dispose() {
+    _safetyTimer?.cancel();
     _transformationController.dispose();
     _entryAnimationController.dispose();
     _routeAnimationController.dispose();
@@ -57,11 +80,17 @@ class _EnhancedAfricaMapWidgetState extends State<EnhancedAfricaMapWidget>
     final homeBloc = context.read<HomeBloc>();
     final currentCountry = homeBloc.state.currentCountry;
     
+    // Only show entry animation if we have a valid country
     if (currentCountry.isNotEmpty) {
       _animateToCountry(currentCountry, showWelcomeMessage: true);
+      _entryAnimationController.forward();
+    } else {
+      // If no country, hide the animation immediately
+      setState(() {
+        _showEntryAnimation = false;
+      });
     }
     
-    _entryAnimationController.forward();
     _routeAnimationController.repeat();
   }
 
@@ -110,7 +139,17 @@ class _EnhancedAfricaMapWidgetState extends State<EnhancedAfricaMapWidget>
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeBloc, HomeState>(
+    return BlocConsumer<HomeBloc, HomeState>(
+      listener: (context, state) {
+        // If currentCountry changes and we don't have an initial country yet, play the animation
+        if (state.currentCountry.isNotEmpty && !_showEntryAnimation && _entryAnimationController.status == AnimationStatus.dismissed) {
+          setState(() {
+            _showEntryAnimation = true;
+          });
+          _animateToCountry(state.currentCountry, showWelcomeMessage: true);
+          _entryAnimationController.forward();
+        }
+      },
       builder: (context, state) {
         return Scaffold(
           body: Stack(
@@ -123,18 +162,18 @@ class _EnhancedAfricaMapWidgetState extends State<EnhancedAfricaMapWidget>
               
               // Mini map overlay
               Positioned(
-                top: 100,
-                right: 16,
+                bottom: 16,
+                left: 16,
                 child: MiniMapOverlay(
                   visibleArea: _getCurrentVisibleArea(),
-                  currentCountry: state.currentCountry,
+                  currentCountry: state.currentCountry.isNotEmpty ? state.currentCountry : 'Senegal',
                   unlockedCountries: state.unlockedCountries,
                   onMapTap: _animateToCountry,
                 ),
               ),
               
               // Entry animation overlay
-              if (_entryAnimationController.isAnimating)
+              if (_showEntryAnimation && state.currentCountry.isNotEmpty)
                 MapEntryAnimation(
                   targetCountry: state.currentCountry,
                   animationController: _entryAnimationController,

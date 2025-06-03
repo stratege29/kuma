@@ -9,6 +9,7 @@ abstract class AuthRemoteDataSource {
   Future<void> signOut();
   Future<void> saveUserData(AppUser user);
   Future<AppUser?> getUserData(String uid);
+  Future<void> updateUserData(AppUser user);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -64,5 +65,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (e) {
       return null;
     }
+  }
+
+  @override
+  Future<void> updateUserData(AppUser user) async {
+    await saveUserData(user);
   }
 }

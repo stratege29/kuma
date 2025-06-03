@@ -1,41 +1,42 @@
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive/hive.dart';
 
-// Features imports will be added as we create them
-// import 'package:kuma/features/auth/data/datasources/auth_local_data_source.dart';
-// import 'package:kuma/features/auth/data/datasources/auth_remote_data_source.dart';
-// import 'package:kuma/features/auth/data/repositories/auth_repository_impl.dart';
-// import 'package:kuma/features/auth/domain/repositories/auth_repository.dart';
-// import 'package:kuma/features/auth/domain/usecases/login_anonymously.dart';
-// import 'package:kuma/features/auth/presentation/bloc/auth_bloc.dart';
+// Features imports
+import 'package:kuma/features/auth/data/datasources/auth_local_data_source.dart';
+import 'package:kuma/features/auth/data/datasources/auth_remote_data_source_v2.dart';
+import 'package:kuma/features/auth/data/repositories/auth_repository_impl_v2.dart';
+import 'package:kuma/features/auth/domain/repositories/auth_repository.dart';
+import 'package:kuma/features/auth/presentation/bloc/auth_bloc.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
   //! Features - Auth
   // Bloc
-  // sl.registerFactory(() => AuthBloc(loginAnonymously: sl()));
-  
-  // Use cases
-  // sl.registerLazySingleton(() => LoginAnonymously(sl()));
+  sl.registerFactory(() => AuthBloc(authRepository: sl()));
   
   // Repository
-  // sl.registerLazySingleton<AuthRepository>(
-  //   () => AuthRepositoryImpl(
-  //     remoteDataSource: sl(),
-  //     localDataSource: sl(),
-  //   ),
-  // );
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImplV2(
+      remoteDataSource: sl(),
+      localDataSource: sl(),
+    ),
+  );
   
   // Data sources
-  // sl.registerLazySingleton<AuthRemoteDataSource>(
-  //   () => AuthRemoteDataSourceImpl(firebaseAuth: sl()),
-  // );
-  // sl.registerLazySingleton<AuthLocalDataSource>(
-  //   () => AuthLocalDataSourceImpl(hive: sl()),
-  // );
+  sl.registerLazySingleton<AuthRemoteDataSourceV2>(
+    () => AuthRemoteDataSourceV2Impl(
+      firebaseAuth: sl(),
+      firestore: sl(),
+      googleSignIn: sl(),
+    ),
+  );
+  sl.registerLazySingleton<AuthLocalDataSource>(
+    () => AuthLocalDataSourceImpl(hive: sl()),
+  );
 
   //! Core
   // sl.registerLazySingleton(() => InputConverter());
@@ -49,6 +50,9 @@ Future<void> _registerExternalDependencies() async {
   // Firebase
   sl.registerLazySingleton(() => FirebaseAuth.instance);
   sl.registerLazySingleton(() => FirebaseFirestore.instance);
+  
+  // Google Sign In
+  sl.registerLazySingleton(() => GoogleSignIn());
   
   // Hive is registered but initFlutter is not used with HiveInterface
   sl.registerLazySingleton<HiveInterface>(() => Hive);

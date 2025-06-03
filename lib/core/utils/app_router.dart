@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kuma/core/constants/app_constants.dart';
 
 // Import pages as we create them
+import 'package:kuma/features/auth/presentation/widgets/auth_wrapper.dart';
 import 'package:kuma/features/onboarding/presentation/pages/splash_page.dart';
 import 'package:kuma/features/onboarding/presentation/pages/onboarding_page.dart';
 import 'package:kuma/features/home/presentation/pages/home_page.dart';
@@ -23,7 +24,7 @@ class AppRouter {
       GoRoute(
         path: AppConstants.ROUTE_SPLASH,
         name: 'splash',
-        builder: (context, state) => const SplashPage(),
+        builder: (context, state) => const AuthWrapper(),
       ),
       GoRoute(
         path: AppConstants.ROUTE_ONBOARDING,

@@ -1,13 +1,33 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kuma/shared/domain/entities/user.dart';
+import 'package:kuma/features/auth/domain/repositories/auth_repository.dart';
 
 part 'onboarding_event.dart';
 part 'onboarding_state.dart';
 part 'onboarding_bloc.freezed.dart';
 
+// Simple in-memory storage for now (will be replaced with proper storage)
+class UserSettingsStore {
+  static UserSettings? _settings;
+  
+  static void saveSettings(UserSettings settings) {
+    _settings = settings;
+  }
+  
+  static UserSettings? getSettings() {
+    return _settings;
+  }
+  
+  static void clear() {
+    _settings = null;
+  }
+}
+
 class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
-  OnboardingBloc() : super(const OnboardingState()) {
+  final AuthRepository? authRepository;
+  
+  OnboardingBloc({this.authRepository}) : super(const OnboardingState()) {
     on<_NextPage>(_onNextPage);
     on<_PreviousPage>(_onPreviousPage);
     on<_GoToPage>(_onGoToPage);
@@ -114,8 +134,21 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     emit(state.copyWith(isLoading: true));
     
     try {
-      // Ici on sauvegarderait les données utilisateur
-      // await _saveUserSettings();
+      // Save user settings
+      final settings = UserSettings(
+        startingCountry: state.startingCountry,
+        primaryGoal: state.primaryGoal,
+        preferredReadingTime: state.preferredTime,
+        language: 'fr',
+        isOnboardingCompleted: true,
+      );
+      
+      UserSettingsStore.saveSettings(settings);
+      
+      // Save to auth repository if available
+      if (authRepository != null) {
+        await authRepository!.saveUserSettings(settings);
+      }
       
       emit(state.copyWith(isLoading: false));
     } catch (e) {
@@ -129,7 +162,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
   void _onSkipOnboarding(
     _SkipOnboarding event,
     Emitter<OnboardingState> emit,
-  ) {
+  ) async {
     // Configuration par défaut pour skip
     emit(state.copyWith(
       userType: 'parent',
@@ -137,5 +170,26 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
       preferredTime: 'Soir (18h-21h)',
       startingCountry: 'Senegal',
     ));
+    
+    // Save default settings
+    final settings = UserSettings(
+      startingCountry: 'Senegal',
+      primaryGoal: 'Découvrir de nouvelles histoires',
+      preferredReadingTime: 'Soir (18h-21h)',
+      language: 'fr',
+      isOnboardingCompleted: true,
+    );
+    
+    UserSettingsStore.saveSettings(settings);
+    
+    // Save to auth repository if available
+    if (authRepository != null) {
+      try {
+        await authRepository!.saveUserSettings(settings);
+      } catch (e) {
+        // Silent fail for skip onboarding
+        print('Failed to save settings: $e');
+      }
+    }
   }
 }
