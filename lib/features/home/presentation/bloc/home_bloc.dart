@@ -3,13 +3,16 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kuma/shared/domain/entities/story.dart';
 import 'package:kuma/core/constants/countries.dart';
 import 'package:kuma/features/onboarding/presentation/bloc/onboarding_bloc.dart';
+import 'package:kuma/features/story/domain/repositories/story_repository.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
 part 'home_bloc.freezed.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  HomeBloc() : super(const HomeState()) {
+  final StoryRepository storyRepository;
+
+  HomeBloc({required this.storyRepository}) : super(const HomeState()) {
     on<_LoadStories>(_onLoadStories);
     on<_SelectStory>(_onSelectStory);
     on<_ClearSelection>(_onClearSelection);
@@ -23,28 +26,48 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(isLoading: true));
 
     try {
-      // Pour l'instant, on utilise des données mock
-      final stories = _generateMockStories();
+      print('HomeBloc: Loading stories from Firestore...');
 
-<<<<<<< HEAD
-      // Utiliser le pays de départ fourni s'il existe
-      final startingCountry = event.startingCountry ?? '';
-      final unlockedCountries =
-          startingCountry.isNotEmpty ? [startingCountry] : [];
-      
-=======
-      // Simuler le pays de départ (pour l'instant Senegal)
-      const startingCountry = 'Senegal';
-      final unlockedCountries = [startingCountry];
+      // Load stories from Firestore
+      final result = await storyRepository.getAllStories();
 
->>>>>>> 8586361 (onbarding ok)
-      emit(state.copyWith(
-        stories: stories,
-        currentCountry: startingCountry,
-        unlockedCountries: unlockedCountries,
-        isLoading: false,
-      ));
+      result.fold(
+        (failure) {
+          print('HomeBloc: Failed to load stories: ${failure.message}');
+          // Fallback to mock stories if Firebase fails
+          final stories = _generateMockStories();
+          final settings = UserSettingsStore.getSettings();
+          final startingCountry = settings?.startingCountry ?? 'Senegal';
+          final unlockedCountries = [startingCountry];
+
+          emit(state.copyWith(
+            stories: stories,
+            currentCountry: startingCountry,
+            unlockedCountries: unlockedCountries,
+            isLoading: false,
+            error: 'Using offline stories: ${failure.message}',
+          ));
+        },
+        (stories) {
+          print(
+              'HomeBloc: Successfully loaded ${stories.length} stories from Firestore');
+
+          // Get the starting country from saved settings
+          final settings = UserSettingsStore.getSettings();
+          final startingCountry = settings?.startingCountry ?? 'Sénégal';
+          final unlockedCountries = [startingCountry];
+
+          emit(state.copyWith(
+            stories: stories,
+            currentCountry: startingCountry,
+            unlockedCountries: unlockedCountries,
+            isLoading: false,
+            error: null,
+          ));
+        },
+      );
     } catch (e) {
+      print('HomeBloc: Exception loading stories: $e');
       emit(state.copyWith(
         isLoading: false,
         error: 'Erreur lors du chargement: ${e.toString()}',
@@ -116,7 +139,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           ageGroup: '6-12 ans',
           difficulty: 'Facile',
         ),
-        isUnlocked: country == (UserSettingsStore.getSettings()?.startingCountry ?? 'Senegal'), // Première histoire débloquée
+        isUnlocked: country ==
+            (UserSettingsStore.getSettings()?.startingCountry ??
+                'Senegal'), // Première histoire débloquée
       );
     }).toList();
   }

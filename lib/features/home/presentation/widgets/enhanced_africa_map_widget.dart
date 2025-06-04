@@ -154,15 +154,35 @@ class _EnhancedAfricaMapWidgetState extends State<EnhancedAfricaMapWidget>
         return Scaffold(
           body: Stack(
             children: [
-              // Main map view
+              // Main map view - full screen
               _buildMapView(state),
               
-              // Progress header
-              const ProgressHeader(),
+              // Minimal floating UI elements
+              SafeArea(
+                child: Column(
+                  children: [
+                    // Top row with minimal stats
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Progress pill on the left
+                          _buildMinimalProgress(state),
+                          
+                          // Cauris counter on the right
+                          _buildMinimalCauris(state),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+              ),
               
-              // Mini map overlay
+              // Mini map overlay - bottom left
               Positioned(
-                bottom: 16,
+                bottom: 100,
                 left: 16,
                 child: MiniMapOverlay(
                   visibleArea: _getCurrentVisibleArea(),
@@ -317,6 +337,88 @@ class _EnhancedAfricaMapWidgetState extends State<EnhancedAfricaMapWidget>
 
   void _handleStoryTap(Story story, String storyState) {
     context.read<HomeBloc>().add(HomeEvent.selectStory(story));
+  }
+
+  Widget _buildMinimalProgress(HomeState state) {
+    final theme = Theme.of(context);
+    final totalStories = 54;
+    final completedStories = state.completedCountries.length;
+    final progressPercentage = (completedStories / totalStories * 100).round();
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Circular progress indicator
+          SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              value: progressPercentage / 100,
+              strokeWidth: 3,
+              backgroundColor: theme.colorScheme.outline.withOpacity(0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '$progressPercentage%',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMinimalCauris(HomeState state) {
+    final theme = Theme.of(context);
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            '🐚',
+            style: TextStyle(fontSize: 16),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '${state.caurisCount}',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Rect _getCurrentVisibleArea() {

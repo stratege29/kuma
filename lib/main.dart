@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:kuma/core/config/firebase_options.dart';
 import 'package:kuma/core/di/injection_container.dart' as di;
 import 'package:kuma/core/theme/app_theme.dart';
@@ -8,6 +9,9 @@ import 'package:kuma/core/utils/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Hive for local storage
+  await Hive.initFlutter();
   
   // Configuration Firebase
   await Firebase.initializeApp(

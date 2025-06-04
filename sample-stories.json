@@ -1,0 +1,199 @@
+{
+  "stories": [
+    {
+      "id": "story_sn_001",
+      "title": "Le Lion et la Souris",
+      "country": "Sénégal",
+      "countryCode": "SN",
+      "content": {
+        "fr": "Il était une fois, dans la vaste savane du Sénégal, un lion majestueux qui dormait paisiblement sous un baobab. Une petite souris, en jouant, grimpa sur lui et le réveilla. Furieux, le lion attrapa la souris dans ses griffes puissantes.\n\n'Pitié, Roi Lion!' supplia la souris. 'Laisse-moi partir, et un jour je pourrai t'aider!'\n\nLe lion éclata de rire. 'Comment une créature aussi petite pourrait-elle aider le roi de la savane?' Mais amusé par l'audace de la souris, il la laissa partir.\n\nQuelques jours plus tard, le lion tomba dans un piège tendu par des chasseurs. Ses rugissements de détresse résonnèrent dans toute la savane. La petite souris reconnut la voix de son sauveur et accourut. Sans hésiter, elle se mit à ronger les cordes du filet avec ses petites dents aiguisées.\n\nBientôt, le lion fut libre. 'Tu avais raison, petite amie,' dit le lion avec gratitude. 'Aucun acte de bonté n'est jamais perdu, peu importe la taille de celui qui l'accomplit.'"
+      },
+      "imageUrl": "https://storage.googleapis.com/kuma-stories/senegal/lion-mouse.jpg",
+      "audioUrl": "https://storage.googleapis.com/kuma-stories/senegal/lion-mouse-fr.mp3",
+      "estimatedReadingTime": 5,
+      "estimatedAudioDuration": 7,
+      "values": ["Entraide", "Gratitude", "Humilité"],
+      "quizQuestions": [
+        {
+          "id": "q1",
+          "question": "Pourquoi le lion a-t-il épargné la souris?",
+          "options": [
+            "Il n'avait pas faim",
+            "Il était amusé par son audace",
+            "Il avait peur de la souris",
+            "Il était trop fatigué"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Le lion a trouvé amusante l'idée qu'une si petite créature puisse un jour l'aider."
+        },
+        {
+          "id": "q2",
+          "question": "Comment la souris a-t-elle libéré le lion?",
+          "options": [
+            "En appelant d'autres animaux",
+            "En rongeant les cordes du piège",
+            "En creusant un tunnel",
+            "En effrayant les chasseurs"
+          ],
+          "correctAnswer": 1,
+          "explanation": "La souris a utilisé ses petites dents pour ronger patiemment les cordes."
+        },
+        {
+          "id": "q3",
+          "question": "Quelle est la morale de cette histoire?",
+          "options": [
+            "Les lions sont dangereux",
+            "Les souris sont intelligentes",
+            "Aucun acte de bonté n'est trop petit",
+            "Il faut éviter les pièges"
+          ],
+          "correctAnswer": 2,
+          "explanation": "L'histoire nous enseigne que même les plus petits peuvent aider les plus grands."
+        }
+      ],
+      "metadata": {
+        "author": "Tradition orale sénégalaise",
+        "origin": "Sénégal",
+        "moralLesson": "L'entraide n'a pas de taille; chaque acte de bonté compte",
+        "keywords": ["entraide", "gratitude", "animaux", "savane", "amitié"],
+        "ageGroup": "5-12",
+        "difficulty": "facile",
+        "createdAt": "2025-01-15T10:00:00Z",
+        "updatedAt": "2025-01-15T10:00:00Z"
+      },
+      "tags": ["animaux", "morale", "classique", "amitié"],
+      "isPublished": true,
+      "order": 1
+    },
+    {
+      "id": "story_ml_001",
+      "title": "Soundiata Keïta, le Lion du Mandé",
+      "country": "Mali",
+      "countryCode": "ML",
+      "content": {
+        "fr": "Dans l'ancien royaume du Mandé, naquit un enfant extraordinaire nommé Soundiata. Fils du roi Naré Maghann Konaté et de Sogolon Kedjou, il était destiné à devenir l'un des plus grands empereurs d'Afrique.\n\nÀ sa naissance, les devins avaient prédit qu'il deviendrait un roi puissant, mais Soundiata ne pouvait pas marcher. Pendant des années, il rampa, subissant les moqueries de tous, surtout de Sassouma Bereté, la première épouse du roi.\n\nUn jour, à l'âge de sept ans, sa mère avait besoin de feuilles de baobab pour cuisiner. Humiliée une fois de plus par Sassouma, Sogolon pleura devant son fils. Soundiata, touché par les larmes de sa mère, demanda qu'on lui apporte une barre de fer.\n\nSous les yeux ébahis de tous, il se leva pour la première fois, pliant la barre de fer sous son poids. Il marcha jusqu'au baobab, le déracina et l'apporta à sa mère. Ce jour-là, le futur Lion du Mandé avait rugi pour la première fois.\n\nSoundiata devint un grand guerrier et unifia les royaumes mandingues, créant le puissant Empire du Mali. Il établit la Charte du Kurukan Fuga, l'une des premières constitutions au monde, garantissant justice et prospérité pour tous."
+      },
+      "imageUrl": "https://storage.googleapis.com/kuma-stories/mali/soundiata-keita.jpg",
+      "audioUrl": "https://storage.googleapis.com/kuma-stories/mali/soundiata-keita-fr.mp3",
+      "estimatedReadingTime": 8,
+      "estimatedAudioDuration": 10,
+      "values": ["Persévérance", "Courage", "Justice", "Leadership"],
+      "quizQuestions": [
+        {
+          "id": "q1",
+          "question": "Quel était le handicap de Soundiata dans son enfance?",
+          "options": [
+            "Il était aveugle",
+            "Il ne pouvait pas parler",
+            "Il ne pouvait pas marcher",
+            "Il était sourd"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Soundiata ne pouvait pas marcher et rampait jusqu'à l'âge de sept ans."
+        },
+        {
+          "id": "q2",
+          "question": "Qu'est-ce qui a motivé Soundiata à se lever pour la première fois?",
+          "options": [
+            "Les moqueries des enfants",
+            "Les larmes de sa mère",
+            "Un défi du roi",
+            "Une vision divine"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Voir sa mère pleurer à cause des humiliations a donné à Soundiata la force de se lever."
+        },
+        {
+          "id": "q3",
+          "question": "Qu'a créé Soundiata Keïta?",
+          "options": [
+            "Le Royaume du Sénégal",
+            "L'Empire du Ghana",
+            "L'Empire du Mali",
+            "Le Royaume de Kanem"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Soundiata a unifié les royaumes mandingues pour créer le puissant Empire du Mali."
+        }
+      ],
+      "metadata": {
+        "author": "Épopée mandingue",
+        "origin": "Mali",
+        "moralLesson": "Les plus grandes forces naissent souvent des plus grandes épreuves",
+        "keywords": ["histoire", "empire", "courage", "leadership", "persévérance"],
+        "ageGroup": "8-15",
+        "difficulty": "moyen",
+        "createdAt": "2025-01-15T10:00:00Z",
+        "updatedAt": "2025-01-15T10:00:00Z"
+      },
+      "tags": ["histoire", "héros", "empire", "leadership"],
+      "isPublished": true,
+      "order": 1
+    },
+    {
+      "id": "story_bf_001",
+      "title": "La Princesse Yennenga",
+      "country": "Burkina Faso",
+      "countryCode": "BF",
+      "content": {
+        "fr": "Il y a très longtemps, dans le royaume de Dagomba, vivait une princesse guerrière nommée Yennenga. Fille du roi Nedega, elle était aussi habile à cheval qu'avec les armes, menant les armées de son père à la victoire.\n\nMais Yennenga rêvait de se marier et d'avoir des enfants. Son père, ne voulant pas perdre sa meilleure guerrière, refusait tous ses prétendants. Désespérée, la princesse décida de s'enfuir.\n\nUne nuit, elle chevaucha vers le nord sur son étalon blanc. Après des jours de voyage, épuisée, elle s'évanouit près d'une forêt. Un jeune chasseur nommé Rialé la trouva et la soigna.\n\nYennenga et Rialé tombèrent amoureux et eurent un fils qu'ils nommèrent Ouedraogo, ce qui signifie 'étalon' en l'honneur du cheval qui avait porté Yennenga vers sa liberté.\n\nOuedraogo grandit et fonda le royaume Mossi, devenant le premier Mogho Naba. Ainsi naquit l'une des plus grandes dynasties d'Afrique de l'Ouest, du courage d'une princesse qui avait choisi son propre destin.\n\nAujourd'hui encore, les Mossi honorent la mémoire de Yennenga, la mère de leur nation, symbole de courage et de liberté."
+      },
+      "imageUrl": "https://storage.googleapis.com/kuma-stories/burkina-faso/yennenga.jpg",
+      "audioUrl": "https://storage.googleapis.com/kuma-stories/burkina-faso/yennenga-fr.mp3",
+      "estimatedReadingTime": 6,
+      "estimatedAudioDuration": 8,
+      "values": ["Liberté", "Courage", "Amour", "Destinée"],
+      "quizQuestions": [
+        {
+          "id": "q1",
+          "question": "Pourquoi Yennenga s'est-elle enfuie du royaume?",
+          "options": [
+            "Elle avait peur de la guerre",
+            "Son père refusait qu'elle se marie",
+            "Elle voulait voyager",
+            "Elle était bannie"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Son père refusait tous ses prétendants car il ne voulait pas perdre sa meilleure guerrière."
+        },
+        {
+          "id": "q2",
+          "question": "Que signifie le nom 'Ouedraogo'?",
+          "options": [
+            "Guerrier",
+            "Prince",
+            "Étalon",
+            "Chasseur"
+          ],
+          "correctAnswer": 2,
+          "explanation": "Ouedraogo signifie 'étalon' en l'honneur du cheval qui avait mené Yennenga vers sa liberté."
+        },
+        {
+          "id": "q3",
+          "question": "Qu'a fondé Ouedraogo?",
+          "options": [
+            "Le royaume Dagomba",
+            "Le royaume Mossi",
+            "L'empire du Mali",
+            "Le royaume Ashanti"
+          ],
+          "correctAnswer": 1,
+          "explanation": "Ouedraogo a fondé le royaume Mossi et est devenu le premier Mogho Naba."
+        }
+      ],
+      "metadata": {
+        "author": "Tradition orale mossi",
+        "origin": "Burkina Faso",
+        "moralLesson": "Le courage de suivre son cœur peut donner naissance à de grandes destinées",
+        "keywords": ["princesse", "guerrière", "liberté", "fondation", "dynastie"],
+        "ageGroup": "8-15",
+        "difficulty": "moyen",
+        "createdAt": "2025-01-15T10:00:00Z",
+        "updatedAt": "2025-01-15T10:00:00Z"
+      },
+      "tags": ["histoire", "femme", "courage", "fondation"],
+      "isPublished": true,
+      "order": 1
+    }
+  ]
+}

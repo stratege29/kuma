@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kuma/core/di/injection_container.dart';
 import 'package:kuma/features/home/presentation/bloc/home_bloc.dart';
 import 'package:kuma/features/home/presentation/widgets/enhanced_africa_map_widget.dart';
 import 'package:kuma/features/home/presentation/widgets/story_bottom_sheet.dart';
@@ -12,8 +13,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          HomeBloc()..add(HomeEvent.loadStories(startingCountry: startingCountry)),
+      create: (context) => sl<HomeBloc>()..add(const HomeEvent.loadStories()),
       child: const HomeView(),
     );
   }
@@ -32,28 +32,8 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Icon(
-              Icons.auto_stories,
-              color: theme.colorScheme.primary,
-            ),
-            const SizedBox(width: 8),
-            const Text('KUMA'),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              // Navigation vers profil
-            },
-          ),
-        ],
-      ),
       body: IndexedStack(
         index: _currentIndex,
         children: [
@@ -71,27 +51,50 @@ class _HomeViewState extends State<HomeView> {
           const Center(child: Text('Profil - À implémenter')),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.map),
-            label: 'Carte',
+      extendBody: true,
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.only(bottom: 20, left: 60, right: 60),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: NavigationBar(
+            selectedIndex: _currentIndex,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            indicatorColor: theme.colorScheme.primary.withOpacity(0.2),
+            height: 60,
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+            onDestinationSelected: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.map),
+                label: 'Carte',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.library_books),
+                label: 'Catalogue',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person),
+                label: 'Profil',
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.library_books),
-            label: 'Catalogue',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
+        ),
       ),
     );
   }
