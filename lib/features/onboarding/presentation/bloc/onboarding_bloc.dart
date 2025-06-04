@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:kuma/core/storage/device_preferences.dart';
 import 'package:kuma/shared/domain/entities/user.dart';
 import 'package:kuma/features/auth/domain/repositories/auth_repository.dart';
 
@@ -145,6 +146,10 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
       
       UserSettingsStore.saveSettings(settings);
       
+      // Save to device preferences (persists across user sessions)
+      await DevicePreferences.setOnboardingCompleted(true);
+      await DevicePreferences.setStartingCountry(state.startingCountry);
+      
       // Save to auth repository if available
       if (authRepository != null) {
         await authRepository!.saveUserSettings(settings);
@@ -181,6 +186,10 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     );
     
     UserSettingsStore.saveSettings(settings);
+    
+    // Save to device preferences (persists across user sessions)
+    await DevicePreferences.setOnboardingCompleted(true);
+    await DevicePreferences.setStartingCountry('Senegal');
     
     // Save to auth repository if available
     if (authRepository != null) {

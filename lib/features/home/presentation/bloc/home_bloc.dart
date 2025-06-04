@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:kuma/shared/domain/entities/story.dart';
+import 'package:kuma/shared/domain/entities/user.dart';
 import 'package:kuma/core/constants/countries.dart';
+import 'package:kuma/core/storage/device_preferences.dart';
 import 'package:kuma/features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'package:kuma/features/story/domain/repositories/story_repository.dart';
 
@@ -11,8 +13,10 @@ part 'home_bloc.freezed.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final StoryRepository storyRepository;
+  final AppUser user;
 
-  HomeBloc({required this.storyRepository}) : super(const HomeState()) {
+  HomeBloc({required this.storyRepository, required this.user})
+      : super(const HomeState()) {
     on<_LoadStories>(_onLoadStories);
     on<_SelectStory>(_onSelectStory);
     on<_ClearSelection>(_onClearSelection);
@@ -31,15 +35,18 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // Load stories from Firestore
       final result = await storyRepository.getAllStories();
 
-      result.fold(
-        (failure) {
-          print('HomeBloc: Failed to load stories: ${failure.message}');
-          // Fallback to mock stories if Firebase fails
-          final stories = _generateMockStories();
-          final settings = UserSettingsStore.getSettings();
-          final startingCountry = settings?.startingCountry ?? 'Senegal';
-          final unlockedCountries = [startingCountry];
+      // Handle the result without using fold with async callbacks
+      if (result.isLeft()) {
+        // Handle failure case
+        final failure = result.fold((l) => l, (r) => null)!;
+        print('HomeBloc: Failed to load stories: ${failure.message}');
 
+        // Fallback to mock stories if Firebase fails
+        final stories = _generateMockStories();
+        final startingCountry = await _getStartingCountry();
+        final unlockedCountries = [startingCountry];
+
+        if (!emit.isDone) {
           emit(state.copyWith(
             stories: stories,
             currentCountry: startingCountry,
@@ -47,16 +54,18 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             isLoading: false,
             error: 'Using offline stories: ${failure.message}',
           ));
-        },
-        (stories) {
-          print(
-              'HomeBloc: Successfully loaded ${stories.length} stories from Firestore');
+        }
+      } else {
+        // Handle success case
+        final stories = result.fold((l) => null, (r) => r)!;
+        print(
+            'HomeBloc: Successfully loaded ${stories.length} stories from Firestore');
 
-          // Get the starting country from saved settings
-          final settings = UserSettingsStore.getSettings();
-          final startingCountry = settings?.startingCountry ?? 'Sénégal';
-          final unlockedCountries = [startingCountry];
+        // Get the starting country from saved settings
+        final startingCountry = await _getStartingCountry();
+        final unlockedCountries = [startingCountry];
 
+        if (!emit.isDone) {
           emit(state.copyWith(
             stories: stories,
             currentCountry: startingCountry,
@@ -64,14 +73,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             isLoading: false,
             error: null,
           ));
-        },
-      );
+        }
+      }
     } catch (e) {
       print('HomeBloc: Exception loading stories: $e');
-      emit(state.copyWith(
-        isLoading: false,
-        error: 'Erreur lors du chargement: ${e.toString()}',
-      ));
+      if (!emit.isDone) {
+        emit(state.copyWith(
+          isLoading: false,
+          error: 'Erreur lors du chargement: ${e.toString()}',
+        ));
+      }
     }
   }
 
@@ -139,9 +150,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           ageGroup: '6-12 ans',
           difficulty: 'Facile',
         ),
-        isUnlocked: country ==
-            (UserSettingsStore.getSettings()?.startingCountry ??
-                'Senegal'), // Première histoire débloquée
+        isUnlocked: false, // Will be set properly when stories are loaded
       );
     }).toList();
   }
@@ -200,5 +209,42 @@ Cette histoire nous rappelle que chaque défi peut être surmonté avec de la cr
         correctAnswer: 2,
       ),
     ];
+  }
+
+  /// Get the starting country from multiple sources with fallback
+  Future<String> _getStartingCountry() async {
+    // Priority order:
+    // 1. User's saved settings (from Firebase)
+    // 2. Device preferences (local storage)
+    // 3. In-memory settings store
+    // 4. Default fallback
+
+    // Check user's saved settings first
+    if (user.settings.startingCountry.isNotEmpty) {
+      print(
+          'HomeBloc: Using starting country from user settings: ${user.settings.startingCountry}');
+      return user.settings.startingCountry;
+    }
+
+    // Check device preferences
+    final deviceCountry = await DevicePreferences.getStartingCountry();
+    if (deviceCountry != null && deviceCountry.isNotEmpty) {
+      print(
+          'HomeBloc: Using starting country from device preferences: $deviceCountry');
+      return deviceCountry;
+    }
+
+    // Check in-memory store (for current session)
+    final memorySettings = UserSettingsStore.getSettings();
+    if (memorySettings?.startingCountry != null &&
+        memorySettings!.startingCountry.isNotEmpty) {
+      print(
+          'HomeBloc: Using starting country from memory store: ${memorySettings.startingCountry}');
+      return memorySettings.startingCountry;
+    }
+
+    // Default fallback
+    print('HomeBloc: Using default starting country: Senegal');
+    return 'Senegal';
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kuma/core/di/injection_container.dart';
+import 'package:kuma/core/storage/device_preferences.dart';
 import 'package:kuma/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:kuma/features/auth/presentation/pages/login_page.dart';
 import 'package:kuma/features/onboarding/presentation/pages/onboarding_page.dart';
@@ -31,14 +32,29 @@ class AuthWrapper extends StatelessWidget {
             },
             authenticated: (user) {
               print('AuthWrapper: Authenticated with user: ${user.id}');
-              // Check if onboarding is completed
-              if (user.settings.isOnboardingCompleted) {
-                print('AuthWrapper: Navigating to HomePage');
-                return const HomePage();
-              } else {
-                print('AuthWrapper: Navigating to OnboardingPage');
-                return const OnboardingPage();
-              }
+              // Check device preferences for onboarding completion
+              return FutureBuilder<bool>(
+                future: DevicePreferences.getOnboardingCompleted(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const _LoadingScreen();
+                  }
+                  
+                  final deviceOnboardingCompleted = snapshot.data ?? false;
+                  final userOnboardingCompleted = user.settings.isOnboardingCompleted;
+                  
+                  // Use device preferences OR user settings (in case of migration)
+                  final isOnboardingCompleted = deviceOnboardingCompleted || userOnboardingCompleted;
+                  
+                  if (isOnboardingCompleted) {
+                    print('AuthWrapper: Onboarding completed, navigating to HomePage');
+                    return HomePage(user: user);
+                  } else {
+                    print('AuthWrapper: Onboarding not completed, navigating to OnboardingPage');
+                    return const OnboardingPage();
+                  }
+                },
+              );
             },
             unauthenticated: (message) {
               print('AuthWrapper: Unauthenticated, showing login screen: $message');

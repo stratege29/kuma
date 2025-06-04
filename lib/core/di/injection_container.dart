@@ -25,11 +25,10 @@ final sl = GetIt.instance;
 Future<void> init() async {
   //! Features - Auth
   // Bloc
-  sl.registerFactory(() => AuthBloc(authRepository: sl()));
+  sl.registerLazySingleton(() => AuthBloc(authRepository: sl()));
 
   //! Features - Home
-  // Bloc
-  sl.registerFactory(() => HomeBloc(storyRepository: sl()));
+  // Bloc - Note: HomeBloc now requires user data, so it's created directly in HomePage
   
   // Repository
   sl.registerLazySingleton<AuthRepository>(

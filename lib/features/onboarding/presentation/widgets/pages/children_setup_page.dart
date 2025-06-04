@@ -250,7 +250,7 @@ class _ChildCard extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        subtitle: Text('${child.age} ans • ${avatar['name']}'),
+        subtitle: Text('${child.age} ans'),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -389,31 +389,11 @@ class _AddChildFormState extends State<_AddChildForm> {
                         width: isSelected ? 2 : 1,
                       ),
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          avatar['emoji'],
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                        const SizedBox(height: 2),
-                        Flexible(
-                          child: Text(
-                            avatar['name'],
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                              color: isSelected 
-                                  ? theme.colorScheme.onPrimaryContainer
-                                  : theme.colorScheme.onSurface,
-                              fontSize: 10,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    child: Center(
+                      child: Text(
+                        avatar['emoji'],
+                        style: const TextStyle(fontSize: 24),
+                      ),
                     ),
                   ),
                 );

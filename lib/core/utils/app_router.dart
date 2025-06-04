@@ -14,9 +14,9 @@ import 'package:kuma/features/quiz/presentation/pages/quiz_result_page.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
-  
+
   static GoRouter get router => _router;
-  
+
   static final _router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: AppConstants.ROUTE_SPLASH,
@@ -31,14 +31,7 @@ class AppRouter {
         name: 'onboarding',
         builder: (context, state) => const OnboardingPage(),
       ),
-      GoRoute(
-        path: AppConstants.ROUTE_HOME,
-        name: 'home',
-        builder: (context, state) {
-          final startingCountry = state.extra as String?;
-          return HomePage(startingCountry: startingCountry);
-        },
-      ),
+      // HomePage is accessed through AuthWrapper, not directly
       GoRoute(
         path: '${AppConstants.ROUTE_READING}/:storyId',
         name: 'reading',
@@ -82,7 +75,7 @@ class AppRouter {
             Text('Page non trouvée: ${state.uri}'),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => context.go(AppConstants.ROUTE_HOME),
+              onPressed: () => context.go(AppConstants.ROUTE_SPLASH),
               child: const Text('Retour à l\'accueil'),
             ),
           ],

@@ -104,12 +104,38 @@ class _StoryCardWidgetState extends State<StoryCardWidget>
               ),
               child: Stack(
                 children: [
-                  // Main icon
+                  // Story image or fallback icon
                   Center(
-                    child: Icon(
-                      _getCardIcon(),
-                      color: _getIconColor(theme),
-                      size: 32,
+                    child: ClipOval(
+                      child: widget.story.imageUrl.isNotEmpty && !widget.story.imageUrl.startsWith('assets/')
+                          ? Image.network(
+                              widget.story.imageUrl,
+                              width: 74,
+                              height: 74,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  _getCardIcon(),
+                                  color: _getIconColor(theme),
+                                  size: 32,
+                                );
+                              },
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                      : null,
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(_getIconColor(theme)),
+                                );
+                              },
+                            )
+                          : Icon(
+                              _getCardIcon(),
+                              color: _getIconColor(theme),
+                              size: 32,
+                            ),
                     ),
                   ),
                   

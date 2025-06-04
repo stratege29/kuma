@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kuma/core/constants/app_constants.dart';
+import 'package:kuma/core/constants/countries.dart';
 import 'package:kuma/shared/domain/entities/story.dart';
 
 class StoryBottomSheet extends StatelessWidget {
@@ -41,25 +42,77 @@ class StoryBottomSheet extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Image placeholder
+                  // Story image
                   Container(
                     width: double.infinity,
                     height: 200,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        colors: [
-                          theme.colorScheme.primary,
-                          theme.colorScheme.secondary,
-                        ],
-                      ),
                     ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.image,
-                        size: 80,
-                        color: Colors.white,
-                      ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: story.imageUrl.isNotEmpty && !story.imageUrl.startsWith('assets/')
+                          ? Image.network(
+                              story.imageUrl,
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        theme.colorScheme.primary,
+                                        theme.colorScheme.secondary,
+                                      ],
+                                    ),
+                                  ),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.image,
+                                      size: 80,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                );
+                              },
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    color: theme.colorScheme.surfaceContainerHighest,
+                                  ),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      value: loadingProgress.expectedTotalBytes != null
+                                          ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                          : null,
+                                      valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                          : Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                gradient: LinearGradient(
+                                  colors: [
+                                    theme.colorScheme.primary,
+                                    theme.colorScheme.secondary,
+                                  ],
+                                ),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.image,
+                                  size: 80,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
 
@@ -197,6 +250,7 @@ class StoryBottomSheet extends StatelessWidget {
       ),
     );
   }
+
 }
 
 class _MetadataRow extends StatelessWidget {

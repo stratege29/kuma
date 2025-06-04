@@ -32,17 +32,30 @@ class AuthRepositoryImplV2 implements AuthRepository {
     
     // Create new user if doesn't exist
     final savedSettings = UserSettingsStore.getSettings();
+    
+    // Try to get onboarding status from local cache as fallback
+    final localSettings = await localDataSource.getLastUserSettings();
+    final onboardingCompleted = savedSettings?.isOnboardingCompleted ?? 
+                               localSettings?.isOnboardingCompleted ?? 
+                               false;
+    
+    final userSettings = savedSettings ?? UserSettings(
+      startingCountry: localSettings?.startingCountry ?? 'Senegal',
+      primaryGoal: localSettings?.primaryGoal ?? '',
+      preferredReadingTime: localSettings?.preferredReadingTime ?? '',
+      language: 'fr',
+      isOnboardingCompleted: onboardingCompleted,
+      notificationsEnabled: localSettings?.notificationsEnabled ?? false,
+      soundEnabled: localSettings?.soundEnabled ?? false,
+      fontSize: localSettings?.fontSize ?? 16.0,
+      darkMode: localSettings?.darkMode ?? false,
+    );
+    
     final newUser = AppUser(
       id: firebaseUser.uid,
       email: firebaseUser.email ?? '',
       userType: savedSettings?.startingCountry.isNotEmpty == true ? 'parent' : 'guest',
-      settings: savedSettings ?? const UserSettings(
-        startingCountry: 'Senegal',
-        primaryGoal: '',
-        preferredReadingTime: '',
-        language: 'fr',
-        isOnboardingCompleted: false,
-      ),
+      settings: userSettings,
       childProfiles: [],
       progress: UserProgress(
         currentCountry: savedSettings?.startingCountry ?? 'Senegal',

@@ -9,10 +9,14 @@ import 'package:kuma/features/home/presentation/widgets/story_card_widget.dart';
 import 'package:kuma/features/home/presentation/widgets/mini_map_overlay.dart';
 import 'package:kuma/features/home/presentation/widgets/progress_header.dart';
 import 'package:kuma/features/home/presentation/widgets/map_entry_animation.dart';
+import 'package:kuma/features/home/presentation/widgets/user_profile_widget.dart';
 import 'package:kuma/shared/domain/entities/story.dart';
+import 'package:kuma/shared/domain/entities/user.dart';
 
 class EnhancedAfricaMapWidget extends StatefulWidget {
-  const EnhancedAfricaMapWidget({super.key});
+  final AppUser user;
+  
+  const EnhancedAfricaMapWidget({super.key, required this.user});
 
   @override
   State<EnhancedAfricaMapWidget> createState() => _EnhancedAfricaMapWidgetState();
@@ -161,16 +165,18 @@ class _EnhancedAfricaMapWidgetState extends State<EnhancedAfricaMapWidget>
               SafeArea(
                 child: Column(
                   children: [
-                    // Top row with minimal stats
+                    // Top row with minimal stats and user profile
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           // Progress pill on the left
                           _buildMinimalProgress(state),
-                          
-                          // Cauris counter on the right
+                          const Spacer(),
+                          // User profile widget
+                          UserProfileWidget(user: widget.user),
+                          const SizedBox(width: 8),
+                          // Cauris counter
                           _buildMinimalCauris(state),
                         ],
                       ),
@@ -303,12 +309,17 @@ class _EnhancedAfricaMapWidgetState extends State<EnhancedAfricaMapWidget>
       return Countries.STORY_STATE_UNLOCKED;
     }
     
+    // Check if this is the user's starting country (should always be unlocked)
+    if (countryName == state.currentCountry && state.currentCountry.isNotEmpty) {
+      return Countries.STORY_STATE_UNLOCKED;
+    }
+    
     // Check if should be visible (based on progression and premium status)
     final countryIndex = Countries.TEST_COUNTRIES.indexOf(countryName);
     final unlockedCount = state.unlockedCountries.length;
     
-    // First story is always visible
-    if (countryIndex == 0) {
+    // First story in the order is always visible (fallback if no starting country set)
+    if (countryIndex == 0 && state.currentCountry.isEmpty) {
       return Countries.STORY_STATE_UNLOCKED;
     }
     

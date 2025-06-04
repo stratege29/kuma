@@ -5,22 +5,27 @@ import 'package:kuma/features/home/presentation/bloc/home_bloc.dart';
 import 'package:kuma/features/home/presentation/widgets/enhanced_africa_map_widget.dart';
 import 'package:kuma/features/home/presentation/widgets/story_bottom_sheet.dart';
 import 'package:kuma/shared/domain/entities/story.dart';
+import 'package:kuma/shared/domain/entities/user.dart';
 
 class HomePage extends StatelessWidget {
-  final String? startingCountry;
-  const HomePage({super.key, this.startingCountry});
+  final AppUser user;
+
+  const HomePage({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => sl<HomeBloc>()..add(const HomeEvent.loadStories()),
-      child: const HomeView(),
+      create: (context) => HomeBloc(storyRepository: sl(), user: user)
+        ..add(const HomeEvent.loadStories()),
+      child: HomeView(user: user),
     );
   }
 }
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+  final AppUser user;
+
+  const HomeView({super.key, required this.user});
 
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -44,7 +49,7 @@ class _HomeViewState extends State<HomeView> {
               }
             },
             builder: (context, state) {
-              return const EnhancedAfricaMapWidget();
+              return EnhancedAfricaMapWidget(user: widget.user);
             },
           ),
           const Center(child: Text('Catalogue - À implémenter')),
