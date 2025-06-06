@@ -132,6 +132,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     _CompleteOnboarding event,
     Emitter<OnboardingState> emit,
   ) async {
+    print('OnboardingBloc: Starting completion process...');
     emit(state.copyWith(isLoading: true));
     
     try {
@@ -144,18 +145,29 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
         isOnboardingCompleted: true,
       );
       
+      print('OnboardingBloc: Created settings - Country: ${state.startingCountry}, Completed: true');
       UserSettingsStore.saveSettings(settings);
       
-      // Save to device preferences (persists across user sessions)
-      await DevicePreferences.setOnboardingCompleted(true);
-      await DevicePreferences.setStartingCountry(state.startingCountry);
+      // Note: Device preferences are NOT used for user-specific onboarding
+      // Each user must complete their own onboarding, stored in their user document
+      print('OnboardingBloc: Skipping device preferences (user-specific onboarding)');
       
       // Save to auth repository if available
       if (authRepository != null) {
+        print('OnboardingBloc: Saving to auth repository...');
         await authRepository!.saveUserSettings(settings);
+        print('OnboardingBloc: Settings saved to auth repository successfully');
       }
       
-      emit(state.copyWith(isLoading: false));
+      // Longer delay to ensure Firestore update completes and propagates
+      print('OnboardingBloc: Waiting for Firestore persistence and propagation...');
+      await Future.delayed(const Duration(milliseconds: 1500));
+      
+      print('OnboardingBloc: Onboarding completion process finished successfully');
+      emit(state.copyWith(
+        isLoading: false,
+        currentPage: 8, // Trigger navigation listener
+      ));
     } catch (e) {
       emit(state.copyWith(
         isLoading: false,
@@ -168,37 +180,8 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     _SkipOnboarding event,
     Emitter<OnboardingState> emit,
   ) async {
-    // Configuration par défaut pour skip
-    emit(state.copyWith(
-      userType: 'parent',
-      primaryGoal: 'Découvrir de nouvelles histoires',
-      preferredTime: 'Soir (18h-21h)',
-      startingCountry: 'Senegal',
-    ));
-    
-    // Save default settings
-    final settings = UserSettings(
-      startingCountry: 'Senegal',
-      primaryGoal: 'Découvrir de nouvelles histoires',
-      preferredReadingTime: 'Soir (18h-21h)',
-      language: 'fr',
-      isOnboardingCompleted: true,
-    );
-    
-    UserSettingsStore.saveSettings(settings);
-    
-    // Save to device preferences (persists across user sessions)
-    await DevicePreferences.setOnboardingCompleted(true);
-    await DevicePreferences.setStartingCountry('Senegal');
-    
-    // Save to auth repository if available
-    if (authRepository != null) {
-      try {
-        await authRepository!.saveUserSettings(settings);
-      } catch (e) {
-        // Silent fail for skip onboarding
-        print('Failed to save settings: $e');
-      }
-    }
+    // Skip onboarding is no longer supported - users must complete onboarding
+    // This method is kept for backward compatibility but does nothing
+    print('OnboardingBloc: Skip onboarding is disabled - users must complete onboarding');
   }
 }

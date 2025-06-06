@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:kuma/shared/domain/entities/story.dart';
 
@@ -21,13 +22,11 @@ class StoryLocalDataSourceImpl implements StoryLocalDataSource {
       
       final box = await Hive.openBox(_storiesBoxName);
       
-      // Convert stories to JSON for storage - using string serialization to avoid Hive type issues
-      final storiesJsonString = stories.map((story) {
-        // Convert to JSON and then to JSON string to avoid complex object serialization issues
-        final json = story.toJson();
-        return json;
-      }).toList();
+      // Convert stories to JSON string for storage to avoid Hive complex object issues
+      final storiesJson = stories.map((story) => story.toJson()).toList();
+      final storiesJsonString = jsonEncode(storiesJson);
       
+      // Store as a single JSON string to avoid Hive adapter issues
       await box.put(_storiesKey, storiesJsonString);
       await box.put(_lastUpdateKey, DateTime.now().toIso8601String());
       
@@ -45,13 +44,14 @@ class StoryLocalDataSourceImpl implements StoryLocalDataSource {
       print('StoryLocalDataSource: Retrieving cached stories...');
       
       final box = await Hive.openBox(_storiesBoxName);
-      final storiesJson = box.get(_storiesKey) as List<dynamic>?;
+      final storiesJsonString = box.get(_storiesKey) as String?;
       
-      if (storiesJson == null || storiesJson.isEmpty) {
+      if (storiesJsonString == null || storiesJsonString.isEmpty) {
         print('StoryLocalDataSource: No cached stories found');
         return [];
       }
       
+      final storiesJson = jsonDecode(storiesJsonString) as List<dynamic>;
       final stories = storiesJson
           .cast<Map<String, dynamic>>()
           .map((json) => Story.fromJson(json))

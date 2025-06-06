@@ -211,13 +211,12 @@ Cette histoire nous rappelle que chaque défi peut être surmonté avec de la cr
     ];
   }
 
-  /// Get the starting country from multiple sources with fallback
+  /// Get the starting country from user-specific sources only
   Future<String> _getStartingCountry() async {
-    // Priority order:
+    // Priority order for user-specific data only:
     // 1. User's saved settings (from Firebase)
-    // 2. Device preferences (local storage)
-    // 3. In-memory settings store
-    // 4. Default fallback
+    // 2. In-memory settings store (for current session)
+    // 3. Error - user must complete onboarding
 
     // Check user's saved settings first
     if (user.settings.startingCountry.isNotEmpty) {
@@ -243,8 +242,10 @@ Cette histoire nous rappelle que chaque défi peut être surmonté avec de la cr
       return memorySettings.startingCountry;
     }
 
-    // Default fallback
-    print('HomeBloc: Using default starting country: Senegal');
-    return 'Senegal';
+    // No fallback - user must select a starting country through onboarding
+    print(
+        'HomeBloc: ERROR - No starting country found! User should complete onboarding.');
+    throw Exception(
+        'No starting country selected. Please complete onboarding.');
   }
 }

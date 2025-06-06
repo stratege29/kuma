@@ -35,9 +35,9 @@ class AuthRepositoryImpl implements AuthRepository {
     final newUser = AppUser(
       id: firebaseUser.uid,
       email: firebaseUser.email ?? '',
-      userType: savedSettings?.startingCountry.isNotEmpty == true ? 'parent' : 'guest',
+      userType: 'parent',
       settings: savedSettings ?? const UserSettings(
-        startingCountry: 'Senegal',
+        startingCountry: '',
         primaryGoal: '',
         preferredReadingTime: '',
         language: 'fr',
@@ -45,12 +45,14 @@ class AuthRepositoryImpl implements AuthRepository {
       ),
       childProfiles: [],
       progress: UserProgress(
-        currentCountry: savedSettings?.startingCountry ?? 'Senegal',
+        currentCountry: savedSettings?.startingCountry ?? '',
         completedStories: const {},
         quizResults: const {},
         totalStoriesRead: 0,
         totalTimeSpent: 0,
-        unlockedCountries: [savedSettings?.startingCountry ?? 'Senegal'],
+        unlockedCountries: savedSettings?.startingCountry?.isNotEmpty == true 
+            ? [savedSettings!.startingCountry] 
+            : [],
         achievements: const [],
       ),
       preferences: const UserPreferences(),
@@ -62,18 +64,6 @@ class AuthRepositoryImpl implements AuthRepository {
     return newUser;
   }
 
-  @override
-  Future<Either<Failure, AppUser>> signInAnonymously() async {
-    try {
-      final firebaseUser = await remoteDataSource.signInAnonymously();
-      final appUser = await _createOrUpdateAppUser(firebaseUser, isNewUser: true);
-      return Right(appUser);
-    } catch (e) {
-      return Left(AuthFailure(
-        message: 'Erreur lors de la connexion anonyme: ${e.toString()}',
-      ));
-    }
-  }
 
   @override
   Future<Either<Failure, AppUser>> signInWithGoogle() async {

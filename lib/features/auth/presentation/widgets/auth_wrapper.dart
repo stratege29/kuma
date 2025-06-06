@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kuma/core/di/injection_container.dart';
-import 'package:kuma/core/storage/device_preferences.dart';
 import 'package:kuma/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:kuma/features/auth/presentation/pages/login_page.dart';
 import 'package:kuma/features/onboarding/presentation/pages/onboarding_page.dart';
@@ -13,7 +12,12 @@ class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => sl<AuthBloc>()..add(const AuthEvent.checkAuthStatus()),
+      create: (context) {
+        final authBloc = sl<AuthBloc>();
+        // Always do a fresh auth check when AuthWrapper is created
+        authBloc.add(const AuthEvent.checkAuthStatus());
+        return authBloc;
+      },
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           print('AuthWrapper state change: $state');
@@ -32,29 +36,30 @@ class AuthWrapper extends StatelessWidget {
             },
             authenticated: (user) {
               print('AuthWrapper: Authenticated with user: ${user.id}');
-              // Check device preferences for onboarding completion
-              return FutureBuilder<bool>(
-                future: DevicePreferences.getOnboardingCompleted(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const _LoadingScreen();
-                  }
-                  
-                  final deviceOnboardingCompleted = snapshot.data ?? false;
-                  final userOnboardingCompleted = user.settings.isOnboardingCompleted;
-                  
-                  // Use device preferences OR user settings (in case of migration)
-                  final isOnboardingCompleted = deviceOnboardingCompleted || userOnboardingCompleted;
-                  
-                  if (isOnboardingCompleted) {
-                    print('AuthWrapper: Onboarding completed, navigating to HomePage');
-                    return HomePage(user: user);
-                  } else {
-                    print('AuthWrapper: Onboarding not completed, navigating to OnboardingPage');
-                    return const OnboardingPage();
-                  }
-                },
-              );
+              
+              // Check user-specific onboarding status only
+              final userOnboardingCompleted = user.settings.isOnboardingCompleted;
+              final userStartingCountry = user.settings.startingCountry ?? '';
+              
+              // Each user must complete their own onboarding
+              final isOnboardingCompleted = userOnboardingCompleted;
+              final hasStartingCountry = userStartingCountry.isNotEmpty;
+              
+              print('AuthWrapper: User onboarding: $userOnboardingCompleted, country: "$userStartingCountry"');
+              print('AuthWrapper: Final decision - completed: $isOnboardingCompleted, hasCountry: $hasStartingCountry');
+              
+              // MANDATORY: User must have completed onboarding AND selected a starting country
+              if (isOnboardingCompleted && hasStartingCountry) {
+                print('AuthWrapper: Onboarding completed with country selection ($userStartingCountry), navigating to HomePage');
+                return HomePage(user: user);
+              } else {
+                if (!hasStartingCountry) {
+                  print('AuthWrapper: No starting country selected, redirecting to onboarding');
+                } else {
+                  print('AuthWrapper: Onboarding not completed, navigating to OnboardingPage');
+                }
+                return const OnboardingPage();
+              }
             },
             unauthenticated: (message) {
               print('AuthWrapper: Unauthenticated, showing login screen: $message');

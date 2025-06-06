@@ -4,7 +4,6 @@ import 'package:kuma/core/constants/app_constants.dart';
 import 'package:kuma/shared/domain/entities/user.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<User> signInAnonymously();
   Future<User?> getCurrentUser();
   Future<void> signOut();
   Future<void> saveUserData(AppUser user);
@@ -21,15 +20,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required this.firestore,
   });
 
-  @override
-  Future<User> signInAnonymously() async {
-    final result = await firebaseAuth.signInAnonymously();
-    final user = result.user;
-    if (user == null) {
-      throw Exception('Échec de la connexion anonyme');
-    }
-    return user;
-  }
 
   @override
   Future<User?> getCurrentUser() async {

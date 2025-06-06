@@ -105,9 +105,6 @@ class _LoginViewState extends State<LoginView> {
                       
                       const SizedBox(height: 32),
                       
-                      // Continue as anonymous option
-                      _buildAnonymousOption(context, isLoading),
-                      
                       const Spacer(),
                       
                       // Terms and privacy
@@ -212,22 +209,6 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  Widget _buildAnonymousOption(BuildContext context, bool isLoading) {
-    return TextButton(
-      onPressed: isLoading
-          ? null
-          : () {
-              context.read<AuthBloc>().add(const AuthEvent.signInAnonymously());
-            },
-      child: Text(
-        'Continuer sans compte',
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
 
   Widget _buildTermsAndPrivacy(ThemeData theme) {
     return Text(

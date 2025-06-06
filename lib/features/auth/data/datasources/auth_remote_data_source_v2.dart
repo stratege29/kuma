@@ -7,7 +7,6 @@ import 'package:kuma/shared/domain/entities/user.dart';
 
 abstract class AuthRemoteDataSourceV2 {
   // Authentication methods
-  Future<User> signInAnonymously();
   Future<User> signInWithGoogle();
   Future<User> signInWithApple();
   Future<User> signInWithEmailPassword(String email, String password);
@@ -44,15 +43,6 @@ class AuthRemoteDataSourceV2Impl implements AuthRemoteDataSourceV2 {
     GoogleSignIn? googleSignIn,
   }) : googleSignIn = googleSignIn ?? GoogleSignIn();
 
-  @override
-  Future<User> signInAnonymously() async {
-    final result = await firebaseAuth.signInAnonymously();
-    final user = result.user;
-    if (user == null) {
-      throw Exception('Échec de la connexion anonyme');
-    }
-    return user;
-  }
 
   @override
   Future<User> signInWithGoogle() async {
@@ -354,18 +344,51 @@ class AuthRemoteDataSourceV2Impl implements AuthRemoteDataSourceV2 {
         print('AuthRemoteDataSource: Document data found, parsing...');
         final data = userDoc.data()!;
         
-        // Convert date strings back to DateTime objects
-        if (data['createdAt'] != null && data['createdAt'] is String) {
-          data['createdAt'] = DateTime.parse(data['createdAt']);
+        try {
+          // Print raw data for debugging
+          print('AuthRemoteDataSource: Raw document keys: ${data.keys.toList()}');
+          
+          // Convert Firestore Timestamps to DateTime objects if needed
+          print('AuthRemoteDataSource: Converting timestamp fields...');
+          _convertTimestampToDateTime(data, 'createdAt');
+          _convertTimestampToDateTime(data, 'lastLoginAt');
+          _convertTimestampToDateTime(data, 'premiumExpiresAt');
+          
+          // Handle nested DateTime fields in progress
+          if (data['progress'] != null && data['progress'] is Map<String, dynamic>) {
+            print('AuthRemoteDataSource: Converting progress timestamps...');
+            _convertTimestampToDateTime(data['progress'], 'lastReadingDate');
+          }
+          
+          // Handle DateTime fields in child profiles
+          if (data['childProfiles'] != null && data['childProfiles'] is List) {
+            print('AuthRemoteDataSource: Converting child profile timestamps...');
+            for (var profile in data['childProfiles']) {
+              if (profile is Map<String, dynamic>) {
+                _convertTimestampToDateTime(profile, 'createdAt');
+                // Handle nested progress in child profiles
+                if (profile['progress'] != null && profile['progress'] is Map<String, dynamic>) {
+                  _convertTimestampToDateTime(profile['progress'], 'lastReadingDate');
+                }
+              }
+            }
+          }
+          
+          print('AuthRemoteDataSource: Validating required fields...');
+          _validateRequiredFields(data);
+          
+          print('AuthRemoteDataSource: Normalizing data types...');
+          _normalizeDataTypes(data);
+          
+          print('AuthRemoteDataSource: Attempting to parse AppUser from JSON...');
+          final user = AppUser.fromJson(data);
+          print('AuthRemoteDataSource: Successfully parsed user: ${user.id}');
+          return user;
+        } catch (parseError) {
+          print('AuthRemoteDataSource: Error during JSON parsing: $parseError');
+          print('AuthRemoteDataSource: Parse error stack trace: ${StackTrace.current}');
+          throw parseError; // Re-throw to see the exact error
         }
-        if (data['lastLoginAt'] != null && data['lastLoginAt'] is String) {
-          data['lastLoginAt'] = DateTime.parse(data['lastLoginAt']);
-        }
-        if (data['premiumExpiresAt'] != null && data['premiumExpiresAt'] is String) {
-          data['premiumExpiresAt'] = DateTime.parse(data['premiumExpiresAt']);
-        }
-        
-        return AppUser.fromJson(data);
       }
       print('AuthRemoteDataSource: No document data found');
       return null;
@@ -373,6 +396,108 @@ class AuthRemoteDataSourceV2Impl implements AuthRemoteDataSourceV2 {
       print('AuthRemoteDataSource: Error getting user data: $e');
       print('AuthRemoteDataSource: Stack trace: ${StackTrace.current}');
       return null;
+    }
+  }
+
+  /// Normalize data types to ensure compatibility with JSON parsing
+  void _normalizeDataTypes(Map<String, dynamic> data) {
+    // Ensure isPremium is a boolean
+    if (data.containsKey('isPremium')) {
+      final value = data['isPremium'];
+      if (value is String) {
+        data['isPremium'] = value.toLowerCase() == 'true';
+      } else if (value is! bool) {
+        data['isPremium'] = false; // Default to false if not boolean
+      }
+    } else {
+      data['isPremium'] = false; // Set default if missing
+    }
+    
+    // Normalize nested boolean fields in settings
+    if (data['settings'] is Map<String, dynamic>) {
+      final settings = data['settings'] as Map<String, dynamic>;
+      _normalizeBooleanField(settings, 'isOnboardingCompleted');
+      _normalizeBooleanField(settings, 'notificationsEnabled');
+      _normalizeBooleanField(settings, 'soundEnabled');
+      _normalizeBooleanField(settings, 'darkMode');
+    }
+    
+    // Normalize nested boolean fields in preferences
+    if (data['preferences'] is Map<String, dynamic>) {
+      final preferences = data['preferences'] as Map<String, dynamic>;
+      _normalizeBooleanField(preferences, 'autoPlay');
+      _normalizeBooleanField(preferences, 'showSubtitles');
+      _normalizeBooleanField(preferences, 'parentalControlEnabled');
+    }
+    
+    print('AuthRemoteDataSource: Data types normalized successfully');
+  }
+  
+  void _normalizeBooleanField(Map<String, dynamic> data, String key) {
+    if (data.containsKey(key)) {
+      final value = data[key];
+      if (value is String) {
+        data[key] = value.toLowerCase() == 'true';
+      } else if (value is! bool) {
+        data[key] = false; // Default to false if not boolean
+      }
+    }
+  }
+
+  /// Validate that all required fields are present and have correct structure
+  void _validateRequiredFields(Map<String, dynamic> data) {
+    final requiredFields = ['id', 'email', 'userType', 'settings', 'childProfiles', 'progress', 'preferences'];
+    
+    for (final field in requiredFields) {
+      if (!data.containsKey(field)) {
+        throw Exception('Missing required field: $field');
+      }
+      if (data[field] == null) {
+        throw Exception('Required field is null: $field');
+      }
+    }
+    
+    // Validate nested objects
+    if (data['settings'] is! Map<String, dynamic>) {
+      throw Exception('settings field must be a Map, got: ${data['settings'].runtimeType}');
+    }
+    if (data['progress'] is! Map<String, dynamic>) {
+      throw Exception('progress field must be a Map, got: ${data['progress'].runtimeType}');
+    }
+    if (data['preferences'] is! Map<String, dynamic>) {
+      throw Exception('preferences field must be a Map, got: ${data['preferences'].runtimeType}');
+    }
+    if (data['childProfiles'] is! List) {
+      throw Exception('childProfiles field must be a List, got: ${data['childProfiles'].runtimeType}');
+    }
+    
+    print('AuthRemoteDataSource: All required fields validated successfully');
+  }
+
+  /// Helper method to convert Firestore Timestamps to DateTime objects
+  void _convertTimestampToDateTime(Map<String, dynamic> data, String key) {
+    if (data[key] != null) {
+      try {
+        final value = data[key];
+        print('AuthRemoteDataSource: Converting $key (type: ${value.runtimeType}) = $value');
+        
+        if (value is String) {
+          data[key] = DateTime.parse(value);
+          print('AuthRemoteDataSource: Converted $key from String to DateTime');
+        } else if (value is Timestamp) {
+          data[key] = value.toDate();
+          print('AuthRemoteDataSource: Converted $key from Timestamp to DateTime');
+        } else if (value is DateTime) {
+          print('AuthRemoteDataSource: $key is already DateTime, no conversion needed');
+        } else {
+          print('AuthRemoteDataSource: WARNING - $key has unexpected type: ${value.runtimeType}');
+        }
+      } catch (e) {
+        print('AuthRemoteDataSource: Error converting $key: $e');
+        // Don't modify the value if conversion fails
+      }
+    } else {
+      print('AuthRemoteDataSource: $key is null, skipping conversion');
     }
   }
 

@@ -40,7 +40,7 @@ class AuthRepositoryImplV2 implements AuthRepository {
                                false;
     
     final userSettings = savedSettings ?? UserSettings(
-      startingCountry: localSettings?.startingCountry ?? 'Senegal',
+      startingCountry: localSettings?.startingCountry ?? '',
       primaryGoal: localSettings?.primaryGoal ?? '',
       preferredReadingTime: localSettings?.preferredReadingTime ?? '',
       language: 'fr',
@@ -54,16 +54,18 @@ class AuthRepositoryImplV2 implements AuthRepository {
     final newUser = AppUser(
       id: firebaseUser.uid,
       email: firebaseUser.email ?? '',
-      userType: savedSettings?.startingCountry.isNotEmpty == true ? 'parent' : 'guest',
+      userType: 'parent',
       settings: userSettings,
       childProfiles: [],
       progress: UserProgress(
-        currentCountry: savedSettings?.startingCountry ?? 'Senegal',
+        currentCountry: savedSettings?.startingCountry ?? '',
         completedStories: const {},
         quizResults: const {},
         totalStoriesRead: 0,
         totalTimeSpent: 0,
-        unlockedCountries: [savedSettings?.startingCountry ?? 'Senegal'],
+        unlockedCountries: savedSettings?.startingCountry?.isNotEmpty == true 
+            ? [savedSettings!.startingCountry] 
+            : [],
         achievements: const [],
       ),
       preferences: const UserPreferences(),
@@ -75,24 +77,6 @@ class AuthRepositoryImplV2 implements AuthRepository {
     return newUser;
   }
 
-  @override
-  Future<Either<Failure, AppUser>> signInAnonymously() async {
-    try {
-      print('AuthRepository: Starting anonymous sign-in...');
-      final firebaseUser = await remoteDataSource.signInAnonymously();
-      print('AuthRepository: Anonymous Firebase user created: ${firebaseUser.uid}');
-      
-      print('AuthRepository: Creating/updating app user...');
-      final appUser = await _createOrUpdateAppUser(firebaseUser, isNewUser: true);
-      print('AuthRepository: App user created: ${appUser.id}');
-      return Right(appUser);
-    } catch (e) {
-      print('AuthRepository: Error in signInAnonymously: $e');
-      return Left(AuthFailure(
-        message: 'Erreur lors de la connexion anonyme: ${e.toString()}',
-      ));
-    }
-  }
 
   @override
   Future<Either<Failure, AppUser>> signInWithGoogle() async {
@@ -287,22 +271,38 @@ class AuthRepositoryImplV2 implements AuthRepository {
   @override
   Future<Either<Failure, void>> saveUserSettings(UserSettings settings) async {
     try {
+      print('AuthRepository: Saving user settings...');
+      print('AuthRepository: Settings to save - Country: ${settings.startingCountry}, Completed: ${settings.isOnboardingCompleted}');
+      
       // Save locally
       await localDataSource.cacheUserSettings(settings);
       UserSettingsStore.saveSettings(settings);
+      print('AuthRepository: Settings saved locally and in memory store');
       
       // Update in Firestore if user is logged in
       final firebaseUser = await remoteDataSource.getCurrentUser();
       if (firebaseUser != null) {
+        print('AuthRepository: Firebase user found: ${firebaseUser.uid}');
         final userData = await remoteDataSource.getUserData(firebaseUser.uid);
         if (userData != null) {
+          print('AuthRepository: Current user data found, updating settings...');
+          print('AuthRepository: Old settings - Country: ${userData.settings.startingCountry}, Completed: ${userData.settings.isOnboardingCompleted}');
+          
           final updatedUser = userData.copyWith(settings: settings);
+          print('AuthRepository: New settings - Country: ${updatedUser.settings.startingCountry}, Completed: ${updatedUser.settings.isOnboardingCompleted}');
+          
           await remoteDataSource.updateUserData(updatedUser);
+          print('AuthRepository: User data updated in Firestore successfully');
+        } else {
+          print('AuthRepository: WARNING - No user data found for Firebase user');
         }
+      } else {
+        print('AuthRepository: WARNING - No Firebase user found');
       }
       
       return const Right(null);
     } catch (e) {
+      print('AuthRepository: Error saving user settings: $e');
       return Left(CacheFailure(
         message: 'Erreur lors de la sauvegarde: ${e.toString()}',
       ));

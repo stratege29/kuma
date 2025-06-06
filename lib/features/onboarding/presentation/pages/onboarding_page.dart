@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kuma/core/constants/app_constants.dart';
+import 'package:kuma/core/di/injection_container.dart';
 import 'package:kuma/features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'package:kuma/features/onboarding/presentation/widgets/onboarding_page_view.dart';
 import 'package:kuma/features/onboarding/presentation/widgets/page_indicator.dart';
@@ -12,7 +13,7 @@ class OnboardingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => OnboardingBloc(),
+      create: (context) => OnboardingBloc(authRepository: sl()),
       child: const OnboardingView(),
     );
   }
@@ -58,7 +59,11 @@ class _OnboardingViewState extends State<OnboardingView> {
               extra: state.startingCountry.isNotEmpty ? state.startingCountry : null,
             );
           if (state.currentPage > 7) {
-            context.go(AppConstants.ROUTE_HOME);
+            print(
+                'OnboardingPage: Onboarding completed, navigating to splash (currentPage: ${state.currentPage})');
+            
+            // Navigate to splash (AuthWrapper) which will re-evaluate auth state with fresh data
+            context.go(AppConstants.ROUTE_SPLASH);
           }
 
           // Affichage des erreurs
@@ -137,22 +142,8 @@ class _OnboardingViewState extends State<OnboardingView> {
             ],
           ),
 
-          // Skip button (persistant sur toutes les pages)
-          TextButton(
-            onPressed: () {
-              context.read<OnboardingBloc>().add(
-                    const OnboardingEvent.skipOnboarding(),
-                  );
-              context.go(AppConstants.ROUTE_HOME);
-            },
-            child: Text(
-              'Passer',
-              style: TextStyle(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
+          // Skip button removed - all users must complete onboarding
+          const SizedBox.shrink(),
         ],
       ),
     );
@@ -183,10 +174,14 @@ class _OnboardingViewState extends State<OnboardingView> {
             child: ElevatedButton(
               onPressed: _canProceed(state)
                   ? () {
+                      print(
+                          'OnboardingPage: Button pressed on page ${state.currentPage}');
                       if (state.currentPage == 7) {
+                        print('OnboardingPage: Completing onboarding...');
                         bloc.add(const OnboardingEvent.completeOnboarding());
-                        context.go(AppConstants.ROUTE_HOME);
+                        // Navigation will be handled by state listener after completion
                       } else {
+                        print('OnboardingPage: Going to next page...');
                         bloc.add(const OnboardingEvent.nextPage());
                       }
                     }
@@ -206,25 +201,55 @@ class _OnboardingViewState extends State<OnboardingView> {
   }
 
   bool _canProceed(OnboardingState state) {
+    bool canProceed = false;
     switch (state.currentPage) {
       case 0: // Page de bienvenue
-        return true;
+        canProceed = true;
+        break;
       case 1: // Type d'utilisateur
-        return state.userType.isNotEmpty;
+        canProceed = state.userType.isNotEmpty;
+        if (!canProceed)
+          print('OnboardingPage: Cannot proceed - userType is empty');
+        break;
       case 2: // Configuration enfants
-        return state.userType != 'parent' || state.children.isNotEmpty;
+        canProceed = state.userType != 'parent' || state.children.isNotEmpty;
+        if (!canProceed)
+          print(
+              'OnboardingPage: Cannot proceed - parent with no children: userType=${state.userType}, children=${state.children.length}');
+        break;
       case 3: // Objectif
-        return state.primaryGoal.isNotEmpty;
+        canProceed = state.primaryGoal.isNotEmpty;
+        if (!canProceed)
+          print('OnboardingPage: Cannot proceed - primaryGoal is empty');
+        break;
       case 4: // Heure de lecture
-        return state.preferredTime.isNotEmpty;
+        canProceed = state.preferredTime.isNotEmpty;
+        if (!canProceed)
+          print('OnboardingPage: Cannot proceed - preferredTime is empty');
+        break;
       case 5: // Pays de départ
-        return state.startingCountry.isNotEmpty;
+        canProceed = state.startingCountry.isNotEmpty;
+        if (!canProceed)
+          print('OnboardingPage: Cannot proceed - startingCountry is empty');
+        break;
       case 6: // Récapitulatif
-        return true;
+        canProceed = true;
+        break;
       case 7: // Complet
-        return !state.isLoading;
+        canProceed = !state.isLoading;
+        if (!canProceed)
+          print('OnboardingPage: Cannot proceed - still loading');
+        break;
       default:
-        return false;
+        canProceed = false;
+        print(
+            'OnboardingPage: Cannot proceed - invalid page ${state.currentPage}');
     }
+
+    print('OnboardingPage: Page ${state.currentPage} canProceed: $canProceed');
+    print(
+        'OnboardingPage: State - userType: "${state.userType}", children: ${state.children.length}, goal: "${state.primaryGoal}", time: "${state.preferredTime}", country: "${state.startingCountry}"');
+
+    return canProceed;
   }
 }

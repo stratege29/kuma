@@ -5,7 +5,6 @@ import 'package:kuma/shared/domain/entities/user.dart';
 
 abstract class AuthRepository {
   // Authentication methods
-  Future<Either<Failure, AppUser>> signInAnonymously();
   Future<Either<Failure, AppUser>> signInWithGoogle();
   Future<Either<Failure, AppUser>> signInWithApple();
   Future<Either<Failure, AppUser>> signInWithEmailPassword(String email, String password);

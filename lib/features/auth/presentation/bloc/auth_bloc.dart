@@ -13,10 +13,11 @@ part 'auth_bloc.freezed.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository authRepository;
   StreamSubscription<User?>? _authStateSubscription;
+  bool _isSigningUp = false;
 
   AuthBloc({required this.authRepository}) : super(const AuthState.initial()) {
     on<_CheckAuthStatus>(_onCheckAuthStatus);
-    on<_SignInAnonymously>(_onSignInAnonymously);
+    on<_RefreshUserData>(_onRefreshUserData);
     on<_SignInWithGoogle>(_onSignInWithGoogle);
     on<_SignInWithApple>(_onSignInWithApple);
     on<_SignInWithEmailPassword>(_onSignInWithEmailPassword);
@@ -30,7 +31,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     // Listen to auth state changes
     _authStateSubscription = authRepository.authStateChanges.listen((firebaseUser) {
-      add(const AuthEvent.checkAuthStatus());
+      // Don't interfere if we're in the middle of a signup process
+      if (_isSigningUp) return;
+      
+      // Only check auth status if we're not already in an authenticated state
+      // This prevents infinite loops when the user is authenticated
+      if (state is! Authenticated && state is! Loading) {
+        // Add a small delay to allow sign-up processes to complete
+        Future.delayed(const Duration(milliseconds: 500), () {
+          // Don't interfere if we're in the middle of a signup process
+          if (_isSigningUp) return;
+          
+          // Double check we're still not authenticated and not loading
+          if (state is! Authenticated && state is! Loading) {
+            add(const AuthEvent.checkAuthStatus());
+          }
+        });
+      }
     });
   }
 
@@ -45,7 +62,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     print('AuthBloc: Checking auth status...');
-    emit(const AuthState.loading());
+    
+    // Don't proceed if we're in the middle of a signup process
+    if (_isSigningUp) {
+      print('AuthBloc: Skipping auth check - signup in progress');
+      return;
+    }
+    
+    // Don't emit loading state if we're already authenticated to prevent UI flicker
+    if (state is! Authenticated) {
+      emit(const AuthState.loading());
+    }
     
     try {
       final result = await authRepository.getCurrentUser();
@@ -59,7 +86,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         (user) {
           if (user != null) {
             print('AuthBloc: User found: ${user.id}');
-            emit(AuthState.authenticated(user: user));
+            // Only emit if we're not already authenticated with the same user
+            if (state is! Authenticated || (state as Authenticated).user.id != user.id) {
+              emit(AuthState.authenticated(user: user));
+            } else {
+              print('AuthBloc: Already authenticated with same user, skipping emit');
+            }
           } else {
             print('AuthBloc: No user found');
             emit(const AuthState.unauthenticated());
@@ -72,30 +104,43 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onSignInAnonymously(
-    _SignInAnonymously event,
+  Future<void> _onRefreshUserData(
+    _RefreshUserData event,
     Emitter<AuthState> emit,
   ) async {
-    print('AuthBloc: Starting anonymous sign-in...');
-    emit(const AuthState.loading());
+    print('AuthBloc: Refreshing user data...');
     
+    // Only refresh if we're currently authenticated
+    if (state is! Authenticated) {
+      print('AuthBloc: Cannot refresh - not authenticated');
+      return;
+    }
+
     try {
-      final result = await authRepository.signInAnonymously();
-      print('AuthBloc: Anonymous sign-in result: $result');
+      final result = await authRepository.getCurrentUser();
+      print('AuthBloc: Refresh result: $result');
       
       result.fold(
         (failure) {
-          print('AuthBloc: Anonymous sign-in failed: $failure');
-          emit(AuthState.error(message: failure.toString()));
+          print('AuthBloc: Refresh failed: $failure');
+          // Don't change state on refresh failure, keep current auth state
         },
         (user) {
-          print('AuthBloc: Anonymous sign-in successful: ${user.id}');
-          emit(AuthState.authenticated(user: user));
+          if (user != null) {
+            print('AuthBloc: User data refreshed successfully: ${user.id}');
+            print('AuthBloc: Updated onboarding status: ${user.settings.isOnboardingCompleted}');
+            print('AuthBloc: Updated starting country: ${user.settings.startingCountry}');
+            emit(AuthState.authenticated(user: user));
+          } else {
+            print('AuthBloc: Refresh returned null user');
+            // User no longer exists, sign out
+            emit(const AuthState.unauthenticated());
+          }
         },
       );
     } catch (e) {
-      print('AuthBloc: Exception in signInAnonymously: $e');
-      emit(AuthState.error(message: e.toString()));
+      print('AuthBloc: Exception during refresh: $e');
+      // Don't change state on error, keep current auth state
     }
   }
 
@@ -103,13 +148,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _SignInWithGoogle event,
     Emitter<AuthState> emit,
   ) async {
+    _isSigningUp = true;
     emit(const AuthState.loading());
     
     final result = await authRepository.signInWithGoogle();
     
     result.fold(
-      (failure) => emit(AuthState.error(message: failure.toString())),
-      (user) => emit(AuthState.authenticated(user: user)),
+      (failure) {
+        _isSigningUp = false;
+        emit(AuthState.error(message: failure.toString()));
+      },
+      (user) {
+        emit(AuthState.authenticated(user: user));
+        // Delay clearing the flag to prevent immediate auth state listener interference
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          _isSigningUp = false;
+        });
+      },
     );
   }
 
@@ -117,13 +172,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _SignInWithApple event,
     Emitter<AuthState> emit,
   ) async {
+    _isSigningUp = true;
     emit(const AuthState.loading());
     
     final result = await authRepository.signInWithApple();
     
     result.fold(
-      (failure) => emit(AuthState.error(message: failure.toString())),
-      (user) => emit(AuthState.authenticated(user: user)),
+      (failure) {
+        _isSigningUp = false;
+        emit(AuthState.error(message: failure.toString()));
+      },
+      (user) {
+        emit(AuthState.authenticated(user: user));
+        // Delay clearing the flag to prevent immediate auth state listener interference
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          _isSigningUp = false;
+        });
+      },
     );
   }
 
@@ -131,6 +196,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _SignInWithEmailPassword event,
     Emitter<AuthState> emit,
   ) async {
+    _isSigningUp = true;
     emit(const AuthState.loading());
     
     final result = await authRepository.signInWithEmailPassword(
@@ -139,8 +205,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     
     result.fold(
-      (failure) => emit(AuthState.error(message: failure.toString())),
-      (user) => emit(AuthState.authenticated(user: user)),
+      (failure) {
+        _isSigningUp = false;
+        emit(AuthState.error(message: failure.toString()));
+      },
+      (user) {
+        emit(AuthState.authenticated(user: user));
+        // Delay clearing the flag to prevent immediate auth state listener interference
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          _isSigningUp = false;
+        });
+      },
     );
   }
 
@@ -148,17 +223,39 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _SignUpWithEmailPassword event,
     Emitter<AuthState> emit,
   ) async {
+    print('AuthBloc: Starting sign-up with email/password...');
+    _isSigningUp = true; // Set flag to prevent auth state listener interference
     emit(const AuthState.loading());
     
-    final result = await authRepository.signUpWithEmailPassword(
-      event.email,
-      event.password,
-    );
-    
-    result.fold(
-      (failure) => emit(AuthState.error(message: failure.toString())),
-      (user) => emit(AuthState.authenticated(user: user)),
-    );
+    try {
+      final result = await authRepository.signUpWithEmailPassword(
+        event.email,
+        event.password,
+      );
+      
+      print('AuthBloc: Sign-up result received: $result');
+      
+      result.fold(
+        (failure) {
+          print('AuthBloc: Sign-up failed: $failure');
+          _isSigningUp = false; // Clear flag on failure
+          emit(AuthState.error(message: failure.toString()));
+        },
+        (user) {
+          print('AuthBloc: Sign-up successful, user: ${user.id}');
+          emit(AuthState.authenticated(user: user));
+          
+          // Delay clearing the flag to prevent immediate auth state listener interference
+          Future.delayed(const Duration(milliseconds: 1000), () {
+            _isSigningUp = false; // Clear flag after a delay
+          });
+        },
+      );
+    } catch (e) {
+      print('AuthBloc: Exception in sign-up: $e');
+      _isSigningUp = false; // Clear flag on exception
+      emit(AuthState.error(message: e.toString()));
+    }
   }
 
   Future<void> _onLinkWithGoogle(
