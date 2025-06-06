@@ -33,7 +33,10 @@ class AppRouter {
       GoRoute(
         path: AppConstants.ROUTE_HOME,
         name: 'home',
-        builder: (context, state) => const HomePage(),
+        builder: (context, state) {
+          final startingCountry = state.extra as String?;
+          return HomePage(startingCountry: startingCountry);
+        },
       ),
       GoRoute(
         path: '${AppConstants.ROUTE_READING}/:storyId',

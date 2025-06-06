@@ -24,10 +24,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     try {
       // Pour l'instant, on utilise des données mock
       final stories = _generateMockStories();
-      
-      // Simuler le pays de départ (pour l'instant Senegal)
-      const startingCountry = 'Senegal';
-      final unlockedCountries = [startingCountry];
+
+      // Utiliser le pays de départ fourni s'il existe
+      final startingCountry = event.startingCountry ?? '';
+      final unlockedCountries =
+          startingCountry.isNotEmpty ? [startingCountry] : [];
       
       emit(state.copyWith(
         stories: stories,
