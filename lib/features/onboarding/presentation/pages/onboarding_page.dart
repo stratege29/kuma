@@ -53,7 +53,10 @@ class _OnboardingViewState extends State<OnboardingView> {
           
           // Navigation vers l'app après completion
           if (state.currentPage > 6) {
-            context.go(AppConstants.ROUTE_HOME);
+            context.go(
+              AppConstants.ROUTE_HOME,
+              extra: state.startingCountry.isNotEmpty ? state.startingCountry : null,
+            );
           }
           
           // Affichage des erreurs
@@ -137,7 +140,10 @@ class _OnboardingViewState extends State<OnboardingView> {
               context.read<OnboardingBloc>().add(
                 const OnboardingEvent.skipOnboarding(),
               );
-              context.go(AppConstants.ROUTE_HOME);
+              context.go(
+                AppConstants.ROUTE_HOME,
+                extra: 'Senegal',
+              );
             },
             child: Text(
               'Passer',
@@ -179,7 +185,12 @@ class _OnboardingViewState extends State<OnboardingView> {
                 ? () {
                     if (state.currentPage == 6) {
                       bloc.add(const OnboardingEvent.completeOnboarding());
-                      context.go(AppConstants.ROUTE_HOME);
+                      context.go(
+                        AppConstants.ROUTE_HOME,
+                        extra: state.startingCountry.isNotEmpty
+                            ? state.startingCountry
+                            : null,
+                      );
                     } else {
                       bloc.add(const OnboardingEvent.nextPage());
                     }

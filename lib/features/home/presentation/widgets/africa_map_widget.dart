@@ -91,7 +91,13 @@ class _AfricaMapWidgetState extends State<AfricaMapWidget>
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    context.read<HomeBloc>().add(const HomeEvent.loadStories());
+                    final bloc = context.read<HomeBloc>();
+                    context.read<HomeBloc>().add(
+                          HomeEvent.loadStories(
+                              startingCountry: bloc.state.currentCountry.isNotEmpty
+                                  ? bloc.state.currentCountry
+                                  : null),
+                        );
                   },
                   child: const Text('Réessayer'),
                 ),

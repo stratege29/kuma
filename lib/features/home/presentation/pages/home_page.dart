@@ -6,12 +6,14 @@ import 'package:kuma/features/home/presentation/widgets/story_bottom_sheet.dart'
 import 'package:kuma/shared/domain/entities/story.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final String? startingCountry;
+  const HomePage({super.key, this.startingCountry});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HomeBloc()..add(const HomeEvent.loadStories()),
+      create: (context) =>
+          HomeBloc()..add(HomeEvent.loadStories(startingCountry: startingCountry)),
       child: const HomeView(),
     );
   }
