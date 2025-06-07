@@ -85,3 +85,4 @@ pubspec_backup.yaml
 main_simple.dart
 pubspec_simple.yaml
 EOF < /dev/nullkuma_upload/firebase-credentials.json
+kuma_upload/firebase-credentials.json
